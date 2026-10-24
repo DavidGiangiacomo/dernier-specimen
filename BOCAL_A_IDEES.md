@@ -24,4 +24,20 @@ On relit toutes les idées ensemble. Rien n'est effacé : sous chaque idée, on 
 
 ## Les idées
 
-_Le bocal est vide pour l'instant._
+### 2026-10-24 — Plusieurs façons d'apaiser un monstre
+
+**Qui** : Alessio
+
+Chaque monstre peut avoir plusieurs manières d'être apaisé, qui changent selon l'individu.
+
+### 2026-10-24 — Des quêtes de capture
+
+**Qui** : Alessio
+
+Qu'il y ait plus tard des quêtes de capture.
+
+### 2026-10-24 — Améliorer le village des gobelins
+
+**Qui** : Alessio
+
+Une phase de gestion pour améliorer le village des gobelins. On pourrait recruter des PNJ pour nous y aider.
