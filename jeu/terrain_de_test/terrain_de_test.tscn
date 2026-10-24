@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://terrain_de_test/terrain_de_test.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://gojo/gojo.tscn" id="2_gojo"]
+
+[node name="TerrainDeTest" type="Node2D" node_paths=PackedStringArray("camera")]
+script = ExtResource("1_script")
+camera = NodePath("Gojo/Camera2D")
+
+[node name="Gojo" parent="." instance=ExtResource("2_gojo")]
+position = Vector2(320, 192)
