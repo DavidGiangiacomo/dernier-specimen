@@ -2,10 +2,43 @@
 
 [ext_resource type="Script" path="res://terrain_de_test/terrain_de_test.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://gojo/gojo.tscn" id="2_gojo"]
+[ext_resource type="PackedScene" path="res://terrain_de_test/souche.tscn" id="3_souche"]
+[ext_resource type="PackedScene" path="res://creatures/hure/hure.tscn" id="4_hure"]
+[ext_resource type="Script" path="res://interface/coeurs.gd" id="5_coeurs"]
 
-[node name="TerrainDeTest" type="Node2D" node_paths=PackedStringArray("camera")]
+[node name="TerrainDeTest" type="Node2D" node_paths=PackedStringArray("camera", "gojo")]
+y_sort_enabled = true
 script = ExtResource("1_script")
 camera = NodePath("Gojo/Camera2D")
+gojo = NodePath("Gojo")
+
+[node name="Souche1" parent="." instance=ExtResource("3_souche")]
+position = Vector2(216, 192)
+
+[node name="Souche2" parent="." instance=ExtResource("3_souche")]
+position = Vector2(304, 96)
+
+[node name="Souche3" parent="." instance=ExtResource("3_souche")]
+position = Vector2(424, 304)
+
+[node name="Souche4" parent="." instance=ExtResource("3_souche")]
+position = Vector2(560, 136)
+
+[node name="Hure" parent="." instance=ExtResource("4_hure")]
+position = Vector2(480, 200)
 
 [node name="Gojo" parent="." instance=ExtResource("2_gojo")]
 position = Vector2(320, 192)
+
+[node name="Interface" type="CanvasLayer" parent="."]
+
+[node name="Coeurs" type="Control" parent="Interface" node_paths=PackedStringArray("gojo")]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 46.0
+offset_bottom = 14.0
+mouse_filter = 2
+script = ExtResource("5_coeurs")
+gojo = NodePath("../../Gojo")

@@ -1,9 +1,10 @@
 @tool
 extends Node2D
-## Terrain de test du jalon 0 : un damier de tuiles de 16 × 16 pixels, entouré de murs.
+## Terrain de test : un damier de tuiles de 16 × 16 pixels, entouré de murs.
 ##
-## Ce n'est pas un décor, seulement un repère pour sentir le déplacement.
-## Il sera remplacé par la TileMap du Bois des Souches au jalon 4.
+## Ce n'est pas un décor, seulement un repère pour sentir le déplacement et tester le combat
+## (jalon 1 : quelques souches et une hure). Il sera remplacé par la TileMap du Bois des Souches
+## au jalon 4.
 
 const TAILLE_TUILE := 16
 
@@ -29,6 +30,10 @@ const TAILLE_TUILE := 16
 		queue_redraw()
 ## La caméra qui doit s'arrêter aux murs.
 @export var camera: Camera2D
+## Quand Gojo tombe K.O., le terrain recommence depuis le début.
+@export var gojo: Gojo
+## Temps entre le K.O. de Gojo et le retour au début, en secondes.
+@export var duree_avant_recommencer := 1.5
 
 
 func _ready() -> void:
@@ -37,6 +42,8 @@ func _ready() -> void:
 	_construire_murs()
 	if camera:
 		_limiter_camera()
+	if gojo:
+		gojo.ko.connect(_on_gojo_ko)
 
 
 func _draw() -> void:
@@ -79,3 +86,8 @@ func _limiter_camera() -> void:
 	camera.limit_top = int(limites.position.y)
 	camera.limit_right = int(limites.end.x)
 	camera.limit_bottom = int(limites.end.y)
+
+
+func _on_gojo_ko() -> void:
+	await get_tree().create_timer(duree_avant_recommencer).timeout
+	get_tree().reload_current_scene()
