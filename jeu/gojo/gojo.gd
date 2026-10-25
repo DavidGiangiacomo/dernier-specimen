@@ -92,6 +92,8 @@ var _temps_avant_coup := 0.0
 var _temps_eclat := 0.0
 var _progression_analyse := 0.0
 var _cible: Analysable
+## La plante de la sacoche que Gojo examine dans sa main (au lieu d'une cible au contact).
+var _plante_en_main: EspecePlante
 ## Vrai si le gant applique la clé (page complète) plutôt que d'analyser.
 var _applique_cle := false
 ## Après une analyse réussie, il faut relâcher le bouton avant d'en commencer une autre.
@@ -147,6 +149,8 @@ func _physics_process(delta: float) -> void:
 			_commencer_coup()
 		elif Input.is_action_pressed("analyse") and not _attendre_relache and _cible_au_contact():
 			_commencer_analyse(_cible_au_contact())
+		elif Input.is_action_just_pressed("analyse") and not _attendre_relache and _plante_a_examiner():
+			_commencer_examen(_plante_a_examiner())
 		elif interagir_appuye and not Dialogue.attendre_relache and _interactif_proche():
 			_interactif_proche().utiliser(self)
 
@@ -246,6 +250,20 @@ func _cible_au_contact() -> Analysable:
 	return null
 
 
+## La plante choisie dans la sacoche, si Gojo ne l'a pas encore analysée.
+## Une plante cueillie trop vite peut ainsi s'analyser dans la main.
+func _plante_a_examiner() -> EspecePlante:
+	var plante := sacoche.plante_choisie()
+	return plante if plante and not Carnet.est_complete(plante) else null
+
+
+func _commencer_examen(plante: EspecePlante) -> void:
+	etat = Etat.ANALYSE
+	_plante_en_main = plante
+	_applique_cle = false
+	_progression_analyse = 0.0
+
+
 func _commencer_analyse(cible: Analysable) -> void:
 	etat = Etat.ANALYSE
 	_cible = cible
@@ -253,19 +271,22 @@ func _commencer_analyse(cible: Analysable) -> void:
 	_progression_analyse = 0.0
 
 
-## Tant que le bouton est tenu, la barre se remplit au contact et redescend sans contact.
+## Tant que le bouton est tenu, la barre se remplit au contact et redescend sans contact
+## (pour une plante dans la main : tant qu'elle reste la plante choisie).
 ## Bouton relâché : l'analyse est annulée. Barre pleine : une ligne de plus dans le carnet,
 ## ou, si la page était complète, la clé est appliquée.
 func _analyser(direction: Vector2, delta: float) -> void:
-	if not Input.is_action_pressed("analyse") or not is_instance_valid(_cible):
+	if not Input.is_action_pressed("analyse") or not (_plante_en_main or is_instance_valid(_cible)):
 		_arreter_analyse()
 		_marcher(direction, delta)
 		return
-	var au_contact := _zone_contact.overlaps_area(_cible)
+	var au_contact := sacoche.plante_choisie() == _plante_en_main if _plante_en_main else _zone_contact.overlaps_area(_cible)
 	_progression_analyse += (delta if au_contact else -delta) / maxf(duree_analyse, 0.001)
 	_marcher(direction, delta, vitesse_pendant_analyse)
 	if _progression_analyse >= 1.0 - MARGE_ARRONDI:
-		if _applique_cle:
+		if _plante_en_main:
+			Carnet.ajouter_analyse(_plante_en_main)
+		elif _applique_cle:
 			_cible.appliquer_cle()
 			Carnet.marquer_apaisee(_cible.espece)
 		else:
@@ -282,6 +303,7 @@ func _arreter_analyse() -> void:
 	etat = Etat.MARCHE
 	_progression_analyse = 0.0
 	_cible = null
+	_plante_en_main = null
 
 
 func _on_touchee(hitbox: Hitbox) -> void:
@@ -339,6 +361,8 @@ func _mettre_a_jour_apparence() -> void:
 
 	var interactif := _interactif_proche() if etat == Etat.MARCHE else null
 	var invite := interactif.invite() if interactif else ""
+	if invite == "" and etat == Etat.MARCHE and cible == null and _plante_a_examiner():
+		invite = "K : analyser la plante choisie"
 	if invite != _invite:
 		_invite = invite
 		invite_changee.emit(_invite)

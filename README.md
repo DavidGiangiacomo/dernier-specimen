@@ -21,7 +21,7 @@ RPG d'action en vue de dessus où l'on progresse en comprenant les monstres plut
 | Se déplacer | Flèches, ou Z Q S D (W A S D sur un clavier QWERTY) | Stick gauche ou croix |
 | Roulade | Espace | A (croix sur PlayStation) |
 | Coup de bâton | J ou X | X (carré sur PlayStation) |
-| Analyser, ou appliquer la clé (tenir, au contact) | K ou C | B (rond sur PlayStation) |
+| Analyser, ou appliquer la clé (tenir, au contact) ; sans rien toucher, analyser la plante choisie dans la sacoche | K ou C | B (rond sur PlayStation) |
 | Ouvrir ou fermer le carnet (jeu en pause) | Tab ou I | Select |
 | Tourner les pages du carnet | Gauche, droite | Gauche, droite |
 | Parler, ramasser, cueillir, donner la plante choisie, souffler le pollen | E ou Entrée | Y (triangle sur PlayStation) |
