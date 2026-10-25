@@ -19,8 +19,16 @@ RPG d'action en vue de dessus où l'on progresse en comprenant les monstres plut
 | --- | --- | --- |
 | Se déplacer | Flèches, ou Z Q S D (W A S D sur un clavier QWERTY) | Stick gauche ou croix |
 | Roulade | Espace | A (croix sur PlayStation) |
+| Coup de bâton | J ou X | X (carré sur PlayStation) |
 
-**Régler les valeurs** : ouvrir `jeu/gojo/gojo.tscn`, cliquer sur le nœud **Gojo**, et changer les valeurs dans l'inspecteur, rubriques *Marche* et *Roulade*. Pas besoin de toucher au code.
+**Régler les valeurs**, sans toucher au code : ouvrir la scène, cliquer sur le premier nœud, et changer les valeurs dans l'inspecteur.
+
+| Scène | Nœud | Rubriques |
+| --- | --- | --- |
+| `jeu/gojo/gojo.tscn` | Gojo | *Marche*, *Roulade*, *Bâton*, *Vie* |
+| `jeu/creatures/hure/hure.tscn` | Hure | *Vie*, *Errance*, *Charge* |
+
+Les dégâts et le recul d'un coup se règlent sur sa hitbox : `Baton/Hitbox` pour Gojo, `HitboxCharge` pour la hure. L'invincibilité après un coup se règle sur la `Hurtbox` de chacun.
 
 ## Faire évoluer le document
 
