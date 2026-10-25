@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://gojo/gojo.gd" id="1_script"]
 [ext_resource type="Script" path="res://combat/hitbox.gd" id="2_hitbox"]
 [ext_resource type="Script" path="res://combat/hurtbox.gd" id="3_hurtbox"]
+[ext_resource type="Script" path="res://gojo/barre_analyse.gd" id="4_barre"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pieds"]
 size = Vector2(20, 8)
@@ -12,6 +13,9 @@ size = Vector2(20, 22)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_baton"]
 size = Vector2(14, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gant"]
+size = Vector2(8, 14)
 
 [node name="Gojo" type="CharacterBody2D" groups=["gojo"]]
 collision_layer = 2
@@ -55,6 +59,33 @@ active = false
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Baton/Hitbox"]
 position = Vector2(13, 0)
 shape = SubResource("RectangleShape2D_baton")
+
+[node name="Gant" type="Node2D" parent="."]
+position = Vector2(0, -12)
+z_index = 1
+
+[node name="ZoneContact" type="Area2D" parent="Gant"]
+collision_layer = 0
+collision_mask = 32
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Gant/ZoneContact"]
+position = Vector2(14, 0)
+shape = SubResource("RectangleShape2D_gant")
+
+[node name="Main" type="ColorRect" parent="Gant"]
+visible = false
+offset_left = 12.0
+offset_top = -2.0
+offset_right = 16.0
+offset_bottom = 2.0
+mouse_filter = 2
+color = Color(0.56078434, 0.8901961, 1, 1)
+
+[node name="BarreAnalyse" type="Node2D" parent="."]
+position = Vector2(0, -30)
+z_index = 2
+script = ExtResource("4_barre")
 
 [node name="Hurtbox" type="Area2D" parent="."]
 collision_layer = 0

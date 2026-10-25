@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" path="res://terrain_de_test/souche.tscn" id="3_souche"]
 [ext_resource type="PackedScene" path="res://creatures/hure/hure.tscn" id="4_hure"]
 [ext_resource type="Script" path="res://interface/coeurs.gd" id="5_coeurs"]
+[ext_resource type="Script" path="res://interface/page.gd" id="6_page"]
 
 [node name="TerrainDeTest" type="Node2D" node_paths=PackedStringArray("camera", "gojo")]
 y_sort_enabled = true
@@ -42,3 +43,16 @@ offset_bottom = 14.0
 mouse_filter = 2
 script = ExtResource("5_coeurs")
 gojo = NodePath("../../Gojo")
+
+[node name="Page" type="Control" parent="Interface"]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -34.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = 28.0
+grow_horizontal = 0
+mouse_filter = 2
+script = ExtResource("6_page")

@@ -4,6 +4,7 @@ extends CharacterBody2D
 ##
 ## Jalon 0 : déplacement en huit directions, roulade et caméra.
 ## Jalon 1 : coup de bâton, PV, recul et invincibilité après un coup.
+## Jalon 2 : le gant, qui analyse au contact en tenant le bouton.
 ## Toutes les valeurs @export se règlent dans l'inspecteur, sans toucher au code.
 ## Ce sont des points de départ : elles seront toutes fausses au premier test.
 
@@ -12,7 +13,7 @@ signal pv_changes(pv: int, pv_max: int)
 ## Émis quand Gojo tombe à 0 PV. C'est le niveau qui décide de la suite.
 signal ko
 
-enum Etat { MARCHE, ROULADE, ATTAQUE, KO }
+enum Etat { MARCHE, ROULADE, ATTAQUE, ANALYSE, KO }
 
 ## Le milieu du corps : Gojo fait 24 × 24 pixels, et son origine est à ses pieds.
 const CENTRE := Vector2(0, -12)
@@ -45,6 +46,12 @@ const DUREE_ECLAT := 0.1
 ## Durée pendant laquelle le coup fait mal et Gojo reste sur place, en secondes.
 @export var duree_coup := 0.12
 
+@export_group("Gant")
+## Temps de contact pour réussir une analyse, en secondes.
+@export var duree_analyse := 1.0
+## Vitesse de marche pendant l'analyse, pour suivre une créature qui bouge, en pixels par seconde.
+@export var vitesse_pendant_analyse := 40.0
+
 @export_group("Vie")
 ## PV de départ. Un cœur vaut 2 PV.
 @export var pv_max := 6
@@ -71,12 +78,21 @@ var _temps_recharge := 0.0
 var _temps_coup := 0.0
 var _temps_avant_coup := 0.0
 var _temps_eclat := 0.0
+var _progression_analyse := 0.0
+var _espece_analysee: Espece
+## Après une analyse réussie, il faut relâcher le bouton avant d'en commencer une autre.
+var _attendre_relache := false
+var _temps_eclat_gant := 0.0
 
 @onready var _corps: ColorRect = $Corps
 @onready var _repere_regard: ColorRect = $RepereRegard
 @onready var _baton: Node2D = $Baton
 @onready var _hitbox_baton: Hitbox = $Baton/Hitbox
 @onready var _hurtbox: Hurtbox = $Hurtbox
+@onready var _gant: Node2D = $Gant
+@onready var _zone_contact: Area2D = $Gant/ZoneContact
+@onready var _main: ColorRect = $Gant/Main
+@onready var _barre_analyse: Node2D = $BarreAnalyse
 
 
 func _ready() -> void:
@@ -89,6 +105,9 @@ func _physics_process(delta: float) -> void:
 	var direction := Input.get_vector("gauche", "droite", "haut", "bas")
 	_temps_avant_coup = maxf(_temps_avant_coup - delta, 0.0)
 	_temps_eclat = maxf(_temps_eclat - delta, 0.0)
+	_temps_eclat_gant = maxf(_temps_eclat_gant - delta, 0.0)
+	if not Input.is_action_pressed("analyse"):
+		_attendre_relache = false
 
 	if etat == Etat.ROULADE and _temps_ecoule(_temps_roulade, duree_roulade):
 		_finir_roulade()
@@ -101,6 +120,8 @@ func _physics_process(delta: float) -> void:
 			_commencer_roulade(direction)
 		elif Input.is_action_just_pressed("attaque") and _temps_avant_coup <= MARGE_ARRONDI:
 			_commencer_coup()
+		elif Input.is_action_pressed("analyse") and not _attendre_relache and _cible_au_contact():
+			_commencer_analyse(_cible_au_contact().espece)
 
 	match etat:
 		Etat.MARCHE:
@@ -112,6 +133,8 @@ func _physics_process(delta: float) -> void:
 		Etat.ATTAQUE:
 			_marcher(Vector2.ZERO, delta)
 			_temps_coup += delta
+		Etat.ANALYSE:
+			_analyser(direction, delta)
 		Etat.KO:
 			_marcher(Vector2.ZERO, delta)
 
@@ -120,10 +143,10 @@ func _physics_process(delta: float) -> void:
 	_mettre_a_jour_apparence()
 
 
-func _marcher(direction: Vector2, delta: float) -> void:
+func _marcher(direction: Vector2, delta: float, vitesse := vitesse_marche) -> void:
 	var duree := duree_acceleration if direction != Vector2.ZERO else duree_freinage
 	var acceleration := vitesse_marche / maxf(duree, 0.001)
-	velocity = velocity.move_toward(direction * vitesse_marche, acceleration * delta)
+	velocity = velocity.move_toward(direction * vitesse, acceleration * delta)
 	if direction != Vector2.ZERO:
 		direction_regard = direction.normalized()
 
@@ -160,7 +183,51 @@ func _ranger_baton() -> void:
 	_hitbox_baton.active = false
 
 
+## La première zone analysable touchée par le gant dont la page n'est pas encore complète.
+func _cible_au_contact() -> Analysable:
+	for zone in _zone_contact.get_overlapping_areas():
+		var cible := zone as Analysable
+		if cible and cible.espece and not Carnet.est_complete(cible.espece):
+			return cible
+	return null
+
+
+func _commencer_analyse(espece: Espece) -> void:
+	etat = Etat.ANALYSE
+	_espece_analysee = espece
+	_progression_analyse = 0.0
+
+
+## Tant que le bouton est tenu, la barre se remplit au contact et redescend sans contact.
+## Bouton relâché : l'analyse est annulée.
+func _analyser(direction: Vector2, delta: float) -> void:
+	if not Input.is_action_pressed("analyse"):
+		_arreter_analyse()
+		_marcher(direction, delta)
+		return
+	var cible := _cible_au_contact()
+	var au_contact := cible != null and cible.espece == _espece_analysee
+	_progression_analyse += (delta if au_contact else -delta) / maxf(duree_analyse, 0.001)
+	_marcher(direction, delta, vitesse_pendant_analyse)
+	if _progression_analyse >= 1.0 - MARGE_ARRONDI:
+		Carnet.ajouter_analyse(_espece_analysee)
+		_temps_eclat_gant = DUREE_ECLAT * 2.0
+		_attendre_relache = true
+		_arreter_analyse()
+	elif _progression_analyse <= 0.0:
+		_arreter_analyse()
+
+
+func _arreter_analyse() -> void:
+	etat = Etat.MARCHE
+	_progression_analyse = 0.0
+	_espece_analysee = null
+
+
 func _on_touchee(hitbox: Hitbox) -> void:
+	if etat == Etat.ANALYSE:
+		# Un coup reçu vide la barre : l'analyse est perdue.
+		_arreter_analyse()
 	pv = maxi(pv - hitbox.degats, 0)
 	pv_changes.emit(pv, pv_max)
 	velocity = (global_position - hitbox.global_position).normalized() * hitbox.force_recul
@@ -194,6 +261,12 @@ func _mettre_a_jour_apparence() -> void:
 		opacite = 0.25 if posmod(Engine.get_physics_frames(), 10) < 5 else 1.0
 	_corps.modulate.a = opacite
 
-	# Le bâton suit le regard même rangé, pour que le coup parte du bon côté dès la première image.
+	# Le bâton et le gant suivent le regard, pour agir du bon côté dès la première image.
 	_baton.rotation = direction_regard.angle()
+	_gant.rotation = direction_regard.angle()
+	# La main s'allume quand elle touche quelque chose d'analysable, et brille pendant l'analyse.
+	_main.visible = etat == Etat.ANALYSE or _temps_eclat_gant > MARGE_ARRONDI or (etat == Etat.MARCHE and _cible_au_contact() != null)
+	_main.modulate.a = 1.0 if etat == Etat.ANALYSE or _temps_eclat_gant > MARGE_ARRONDI else 0.4
+	_main.color = Color.WHITE if _temps_eclat_gant > MARGE_ARRONDI else Color("8fe3ff")
+	_barre_analyse.progression = _progression_analyse
 	_repere_regard.position = CENTRE + direction_regard * 8.0 - _repere_regard.size / 2.0
