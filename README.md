@@ -13,16 +13,20 @@ RPG d'action en vue de dessus où l'on progresse en comprenant les monstres plut
 
 1. Installer [Godot 4.7.2](https://godotengine.org/article/maintenance-release-godot-4-7-2/) (version standard, pas .NET). On garde cette version jusqu'à la fin de la tranche verticale.
 2. Dans le gestionnaire de projets de Godot : **Importer**, puis choisir `jeu/project.godot`.
-3. Appuyer sur **F5** pour jouer.
+3. Appuyer sur **F5** pour jouer : on commence dans la clairière du Bois des Souches.
+   Le terrain de test des premiers jalons reste disponible : ouvrir `jeu/terrain_de_test/terrain_de_test.tscn`, puis **F6**.
 
 | Action | Clavier | Manette |
 | --- | --- | --- |
 | Se déplacer | Flèches, ou Z Q S D (W A S D sur un clavier QWERTY) | Stick gauche ou croix |
 | Roulade | Espace | A (croix sur PlayStation) |
 | Coup de bâton | J ou X | X (carré sur PlayStation) |
-| Analyser, ou appliquer la clé (tenir, au contact) | K ou C | B (rond sur PlayStation) |
+| Analyser, ou appliquer la clé (tenir, au contact) ; sans rien toucher, analyser la plante choisie dans la sacoche | K ou C | B (rond sur PlayStation) |
 | Ouvrir ou fermer le carnet (jeu en pause) | Tab ou I | Select |
 | Tourner les pages du carnet | Gauche, droite | Gauche, droite |
+| Parler, ramasser, cueillir, donner la plante choisie, souffler le pollen | E ou Entrée | Y (triangle sur PlayStation) |
+| Changer de plante choisie | R | RB (R1 sur PlayStation) |
+| Passer à la ligne suivante d'un dialogue | E ou Entrée | Y |
 
 **Régler les valeurs**, sans toucher au code : ouvrir la scène, cliquer sur le premier nœud, et changer les valeurs dans l'inspecteur.
 
@@ -30,7 +34,10 @@ RPG d'action en vue de dessus où l'on progresse en comprenant les monstres plut
 | --- | --- | --- |
 | `jeu/gojo/gojo.tscn` | Gojo | *Marche*, *Roulade*, *Bâton*, *Gant*, *Vie* |
 | `jeu/creatures/hure/hure.tscn` | Hure | *Vie*, *Errance*, *Charge* |
-| `jeu/carnet/carnet.tscn` | Carnet | *Analyses par page* |
+| `jeu/creatures/rase_mousse/rase_mousse.tscn` | RaseMousse | *Vie*, *Nuée*, *Pollen* |
+| `jeu/creatures/gobelin/gobelin.tscn` | Gobelin | vitesses, durée et recharge des coups |
+| `jeu/carnet/carnet.tscn` | Carnet | *Analyses par page*, *Analyses par plante* |
+| `jeu/zone/bois_des_souches.tscn` | BoisDesSouches | *Combat du réflexe*, *Reprise*, *Répliques* |
 
 Les dégâts et le recul d'un coup se règlent sur sa hitbox : `Baton/Hitbox` pour Gojo, `HitboxCharge` pour la hure. L'invincibilité après un coup se règle sur la `Hurtbox` de chacun.
 
@@ -43,7 +50,16 @@ Les dégâts et le recul d'un coup se règlent sur sa hitbox : `Baton/Hitbox` po
 | *Observations et clé* | Une observation par analyse, la clé | Une ligne par analyse réussie ; la clé avec la dernière |
 | *Dessin* | Croquis (une image), couleur provisoire | Toujours ; la couleur remplace le croquis tant qu'il manque |
 
-Les textes de la hure sont provisoires, tirés du GDD : c'est à Alessio de les réécrire d'après sa fiche.
+Les plantes de l'herbier (`jeu/plantes/*.tres`) ont en plus une rubrique *Plante* : leur effet, et le nom et la couleur qu'elles ont avant d'être analysées (la mousse-de-lune et la ronce-rouge se ressemblent).
+
+Tous les textes sont provisoires, tirés du GDD : c'est à Alessio de les réécrire d'après ses fiches.
+
+## Le Bois des Souches
+
+La zone de la tranche verticale est dans `jeu/zone/` :
+
+- **La carte** (`carte.tscn`) : deux couches de tuiles, *Sol* et *Obstacles*, à repeindre avec l'éditeur de TileMap de Godot. Les tuiles sont provisoires (`tuiles/tuiles_provisoires.png`) ; arbres, buissons et huttes bloquent le passage.
+- **Le déroulé** (`bois_des_souches.tscn`) : Greg, Lila, les villageois, les malades, la hure, les rase-mousses, les plantes, les ronces des passages à sens unique. Les répliques de la quête se réécrivent dans l'inspecteur du nœud *BoisDesSouches*, rubrique *Répliques* ; celles de chaque gobelin, dans son propre inspecteur. Une réplique s'écrit `Nom : texte`, ou sans nom pour une description.
 
 ## Faire évoluer le document
 

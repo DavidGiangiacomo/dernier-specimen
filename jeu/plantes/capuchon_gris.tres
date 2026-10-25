@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EspecePlante" format=3]
+
+[ext_resource type="Script" path="res://plantes/espece_plante.gd" id="1_eedfq"]
+
+[resource]
+script = ExtResource("1_eedfq")
+effet = 1
+nom_apparent = "Champignon gris"
+couleur_apparente = Color(0.6392157, 0.61960787, 0.5803922, 1)
+nom_de_terrain = "Capuchon gris"
+description_avant = "Champignon à chapeau rond. Aime la boue."
+observations = Array[String](["Referme les taches de la peau."])
+couleur = Color(0.7254902, 0.69803923, 0.6431373, 1)

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Espece" format=3]
+
+[ext_resource type="Script" path="res://carnet/espece.gd" id="1_mj6s6"]
+
+[resource]
+script = ExtResource("1_mj6s6")
+nom_de_terrain = "Spécimen R-02"
+description_avant = "Nuée d'insectivores volants. Comportement erratique. Nuisibles."
+nom_veritable = "Les rase-mousses"
+description_apres = "Ils ne chassaient pas Gojo : ils gardaient leurs nids. Endormis, ils sont tout petits."
+observations = Array[String](["Ils ne tiennent jamais en place, sauf endormis.", "Ils mordent les intrus, puis s'enfuient.", "Ils gardent des nids, dans la mousse du creux."])
+cle = "Le pollen de fleur-trompette les endort."
+couleur = Color(0.654902, 0.72156864, 0.5411765, 1)

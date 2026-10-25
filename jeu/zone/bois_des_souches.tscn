@@ -1,0 +1,498 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://zone/bois_des_souches.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://zone/carte.tscn" id="2_carte"]
+[ext_resource type="PackedScene" path="res://gojo/gojo.tscn" id="3_gojo"]
+[ext_resource type="PackedScene" path="res://creatures/gobelin/gobelin.tscn" id="4_gobelin"]
+[ext_resource type="PackedScene" path="res://creatures/hure/hure.tscn" id="5_hure"]
+[ext_resource type="PackedScene" path="res://zone/souche.tscn" id="6_souche"]
+[ext_resource type="PackedScene" path="res://plantes/plante.tscn" id="7_plante"]
+[ext_resource type="Resource" path="res://plantes/mousse_de_lune.tres" id="8_mousse"]
+[ext_resource type="Resource" path="res://plantes/ronce_rouge.tres" id="9_ronce"]
+[ext_resource type="Resource" path="res://plantes/capuchon_gris.tres" id="10_capuchon"]
+[ext_resource type="Resource" path="res://plantes/fleur_trompette.tres" id="11_fleur"]
+[ext_resource type="Script" path="res://interaction/interactif.gd" id="12_interactif"]
+[ext_resource type="Script" path="res://interface/coeurs.gd" id="13_coeurs"]
+[ext_resource type="Script" path="res://interface/page.gd" id="14_page"]
+[ext_resource type="Script" path="res://interface/barre_plantes.gd" id="15_barre"]
+[ext_resource type="Script" path="res://interface/invite.gd" id="16_invite"]
+[ext_resource type="PackedScene" path="res://carnet/interface_carnet.tscn" id="17_carnet"]
+[ext_resource type="PackedScene" path="res://creatures/rase_mousse/rase_mousse.tscn" id="18_rase_mousse"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ronces"]
+size = Vector2(16, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_entree"]
+size = Vector2(32, 160)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_baton"]
+radius = 10.0
+
+[node name="BoisDesSouches" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_script")
+
+[node name="Carte" parent="." instance=ExtResource("2_carte")]
+
+[node name="Gojo" parent="." instance=ExtResource("3_gojo")]
+position = Vector2(88, 296)
+a_le_baton = false
+
+[node name="Clairiere" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="BatonAuSol" type="Node2D" parent="Clairiere"]
+position = Vector2(184, 300)
+
+[node name="Visuel" type="ColorRect" parent="Clairiere/BatonAuSol"]
+offset_left = -7.0
+offset_top = -3.0
+offset_right = 7.0
+mouse_filter = 2
+color = Color(0.4314, 0.3020, 0.1843, 1)
+
+[node name="Interactif" type="Area2D" parent="Clairiere/BatonAuSol"]
+collision_layer = 64
+collision_mask = 0
+monitoring = false
+script = ExtResource("12_interactif")
+verbe = "ramasser le bâton"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Clairiere/BatonAuSol/Interactif"]
+shape = SubResource("CircleShape2D_baton")
+
+[node name="Fourre" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="EntreeFourre" type="Area2D" parent="Fourre"]
+position = Vector2(368, 288)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Fourre/EntreeFourre"]
+shape = SubResource("RectangleShape2D_entree")
+
+[node name="Greg" parent="Fourre" instance=ExtResource("4_gobelin")]
+position = Vector2(504, 296)
+nom = "Greg"
+couleur = Color(0.4980, 0.6824, 0.3216, 1)
+regard = Vector2(1, 0)
+provoque_l_attaque = true
+
+[node name="Embusques" type="Node2D" parent="Fourre"]
+y_sort_enabled = true
+
+[node name="Embusque1" parent="Fourre/Embusques" instance=ExtResource("4_gobelin")]
+couleur = Color(0.4157, 0.5804, 0.2745, 1)
+repliques = Array[String](["Gobelin : Toi frappé Greg. Moi pas oublier. Mais Lila dit : pas toucher."])
+
+[node name="Embusque2" parent="Fourre/Embusques" instance=ExtResource("4_gobelin")]
+couleur = Color(0.3725, 0.5412, 0.2431, 1)
+repliques = Array[String](["Gobeline : Humain dans le camp. Jamais vu ça."])
+
+[node name="Embusque3" parent="Fourre/Embusques" instance=ExtResource("4_gobelin")]
+couleur = Color(0.4549, 0.6275, 0.2980, 1)
+repliques = Array[String](["Gobelin : Greg dit toi pas comme les autres. On regarde."])
+
+[node name="Camp" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="EntreeCamp" type="Area2D" parent="Camp"]
+position = Vector2(688, 288)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Camp/EntreeCamp"]
+shape = SubResource("RectangleShape2D_entree")
+
+[node name="Lila" parent="Camp" instance=ExtResource("4_gobelin")]
+position = Vector2(840, 270)
+nom = "Lila"
+couleur = Color(0.5490, 0.6039, 0.4471, 1)
+regard = Vector2(1, 0)
+
+[node name="Malades" type="Node2D" parent="Camp"]
+y_sort_enabled = true
+
+[node name="Malade1" parent="Camp/Malades" instance=ExtResource("4_gobelin")]
+position = Vector2(744, 334)
+couleur = Color(0.4353, 0.6039, 0.2902, 1)
+fievre = true
+taches = true
+repliques = Array[String](["Le malade respire mal. Il ne répond pas."])
+
+[node name="Malade2" parent="Camp/Malades" instance=ExtResource("4_gobelin")]
+position = Vector2(776, 350)
+couleur = Color(0.4353, 0.6039, 0.2902, 1)
+fievre = true
+taches = true
+repliques = Array[String](["Le malade respire mal. Il ne répond pas."])
+
+[node name="Malade3" parent="Camp/Malades" instance=ExtResource("4_gobelin")]
+position = Vector2(840, 350)
+couleur = Color(0.4353, 0.6039, 0.2902, 1)
+fievre = true
+taches = true
+repliques = Array[String](["Le malade respire mal. Il ne répond pas."])
+
+[node name="Villageois" type="Node2D" parent="Camp"]
+y_sort_enabled = true
+
+[node name="Gobeline" parent="Camp/Villageois" instance=ExtResource("4_gobelin")]
+position = Vector2(728, 254)
+couleur = Color(0.4039, 0.5725, 0.2627, 1)
+repliques = Array[String](["Gobeline : Malades depuis la pluie. Lila essaie tout. Rien marche."])
+
+[node name="Ancien" parent="Camp/Villageois" instance=ExtResource("4_gobelin")]
+position = Vector2(872, 302)
+couleur = Color(0.4902, 0.5608, 0.3608, 1)
+repliques = Array[String](["Gobelin : Humains brûlent la forêt. Toi, pourquoi pas brûler ?"])
+
+[node name="Bebe1" parent="Camp/Villageois" instance=ExtResource("4_gobelin")]
+position = Vector2(760, 270)
+couleur = Color(0.5451, 0.7412, 0.3686, 1)
+bebe = true
+repliques = Array[String](["Le bébé gobelin te regarde sans ciller."])
+
+[node name="Bebe2" parent="Camp/Villageois" instance=ExtResource("4_gobelin")]
+position = Vector2(856, 318)
+couleur = Color(0.5451, 0.7412, 0.3686, 1)
+bebe = true
+repliques = Array[String](["Le bébé gobelin attrape ta manche, puis s'enfuit."])
+
+[node name="Chene" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Hure" parent="Chene" instance=ExtResource("5_hure")]
+position = Vector2(744, 110)
+
+[node name="Souche1" parent="Chene" instance=ExtResource("6_souche")]
+position = Vector2(728, 140)
+
+[node name="Souche2" parent="Chene" instance=ExtResource("6_souche")]
+position = Vector2(904, 108)
+
+[node name="Souche3" parent="Chene" instance=ExtResource("6_souche")]
+position = Vector2(760, 60)
+
+[node name="MousseDeLune" parent="Chene" instance=ExtResource("7_plante")]
+position = Vector2(888, 124)
+espece = ExtResource("8_mousse")
+
+[node name="RonceRouge" parent="Chene" instance=ExtResource("7_plante")]
+position = Vector2(904, 140)
+espece = ExtResource("9_ronce")
+
+[node name="Creux" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="CapuchonGris" parent="Creux" instance=ExtResource("7_plante")]
+position = Vector2(728, 494)
+espece = ExtResource("10_capuchon")
+
+[node name="FleurTrompette" parent="Creux" instance=ExtResource("7_plante")]
+position = Vector2(904, 526)
+espece = ExtResource("11_fleur")
+
+[node name="RaseMousse1" parent="Creux" instance=ExtResource("18_rase_mousse")]
+position = Vector2(744, 460)
+
+[node name="RaseMousse2" parent="Creux" instance=ExtResource("18_rase_mousse")]
+position = Vector2(776, 456)
+
+[node name="RaseMousse3" parent="Creux" instance=ExtResource("18_rase_mousse")]
+position = Vector2(760, 480)
+
+[node name="RaseMousse4" parent="Creux" instance=ExtResource("18_rase_mousse")]
+position = Vector2(792, 472)
+
+[node name="Passages" type="Node2D" parent="."]
+
+[node name="RoncesFourre" type="StaticBody2D" parent="Passages"]
+position = Vector2(328, 288)
+collision_mask = 0
+
+[node name="Visuel" type="ColorRect" parent="Passages/RoncesFourre"]
+offset_left = -8.0
+offset_top = -16.0
+offset_right = 8.0
+offset_bottom = 16.0
+mouse_filter = 2
+color = Color(0.3529, 0.1647, 0.1725, 1)
+
+[node name="Epine1" type="ColorRect" parent="Passages/RoncesFourre/Visuel"]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 3.0
+offset_right = 4.0
+offset_bottom = 5.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="Epine2" type="ColorRect" parent="Passages/RoncesFourre/Visuel"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 8.0
+offset_right = 11.0
+offset_bottom = 10.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="Epine3" type="ColorRect" parent="Passages/RoncesFourre/Visuel"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 14.0
+offset_right = 6.0
+offset_bottom = 16.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="Epine4" type="ColorRect" parent="Passages/RoncesFourre/Visuel"]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 20.0
+offset_right = 13.0
+offset_bottom = 22.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="Epine5" type="ColorRect" parent="Passages/RoncesFourre/Visuel"]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 26.0
+offset_right = 5.0
+offset_bottom = 28.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Passages/RoncesFourre"]
+shape = SubResource("RectangleShape2D_ronces")
+
+[node name="RoncesCamp" type="StaticBody2D" parent="Passages"]
+position = Vector2(648, 288)
+collision_mask = 0
+
+[node name="Visuel" type="ColorRect" parent="Passages/RoncesCamp"]
+offset_left = -8.0
+offset_top = -16.0
+offset_right = 8.0
+offset_bottom = 16.0
+mouse_filter = 2
+color = Color(0.3529, 0.1647, 0.1725, 1)
+
+[node name="Epine1" type="ColorRect" parent="Passages/RoncesCamp/Visuel"]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 3.0
+offset_right = 4.0
+offset_bottom = 5.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="Epine2" type="ColorRect" parent="Passages/RoncesCamp/Visuel"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 8.0
+offset_right = 11.0
+offset_bottom = 10.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="Epine3" type="ColorRect" parent="Passages/RoncesCamp/Visuel"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 14.0
+offset_right = 6.0
+offset_bottom = 16.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="Epine4" type="ColorRect" parent="Passages/RoncesCamp/Visuel"]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 20.0
+offset_right = 13.0
+offset_bottom = 22.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="Epine5" type="ColorRect" parent="Passages/RoncesCamp/Visuel"]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 26.0
+offset_right = 5.0
+offset_bottom = 28.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Passages/RoncesCamp"]
+shape = SubResource("RectangleShape2D_ronces")
+
+[node name="RoncesLisiere" type="StaticBody2D" parent="Passages"]
+position = Vector2(968, 288)
+collision_mask = 0
+
+[node name="Visuel" type="ColorRect" parent="Passages/RoncesLisiere"]
+offset_left = -8.0
+offset_top = -16.0
+offset_right = 8.0
+offset_bottom = 16.0
+mouse_filter = 2
+color = Color(0.3529, 0.1647, 0.1725, 1)
+
+[node name="Epine1" type="ColorRect" parent="Passages/RoncesLisiere/Visuel"]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 3.0
+offset_right = 4.0
+offset_bottom = 5.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="Epine2" type="ColorRect" parent="Passages/RoncesLisiere/Visuel"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 8.0
+offset_right = 11.0
+offset_bottom = 10.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="Epine3" type="ColorRect" parent="Passages/RoncesLisiere/Visuel"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 14.0
+offset_right = 6.0
+offset_bottom = 16.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="Epine4" type="ColorRect" parent="Passages/RoncesLisiere/Visuel"]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 20.0
+offset_right = 13.0
+offset_bottom = 22.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="Epine5" type="ColorRect" parent="Passages/RoncesLisiere/Visuel"]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 26.0
+offset_right = 5.0
+offset_bottom = 28.0
+mouse_filter = 2
+color = Color(0.1686, 0.2902, 0.1490, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Passages/RoncesLisiere"]
+shape = SubResource("RectangleShape2D_ronces")
+
+[node name="Marqueurs" type="Node2D" parent="."]
+
+[node name="Embuscade1" type="Marker2D" parent="Marqueurs"]
+position = Vector2(488, 270)
+
+[node name="Embuscade2" type="Marker2D" parent="Marqueurs"]
+position = Vector2(456, 334)
+
+[node name="Embuscade3" type="Marker2D" parent="Marqueurs"]
+position = Vector2(552, 270)
+
+[node name="CampGreg" type="Marker2D" parent="Marqueurs"]
+position = Vector2(744, 286)
+
+[node name="RepriseCamp" type="Marker2D" parent="Marqueurs"]
+position = Vector2(792, 300)
+
+[node name="CampVillageois1" type="Marker2D" parent="Marqueurs"]
+position = Vector2(712, 290)
+
+[node name="CampVillageois2" type="Marker2D" parent="Marqueurs"]
+position = Vector2(920, 302)
+
+[node name="CampVillageois3" type="Marker2D" parent="Marqueurs"]
+position = Vector2(776, 246)
+
+[node name="Interface" type="CanvasLayer" parent="."]
+
+[node name="Coeurs" type="Control" parent="Interface" node_paths=PackedStringArray("gojo")]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 46.0
+offset_bottom = 14.0
+mouse_filter = 2
+script = ExtResource("13_coeurs")
+gojo = NodePath("../../Gojo")
+
+[node name="Page" type="Control" parent="Interface"]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -34.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = 28.0
+grow_horizontal = 0
+mouse_filter = 2
+script = ExtResource("14_page")
+
+[node name="AideCarnet" type="Label" parent="Interface/Page"]
+layout_mode = 0
+offset_left = -44.0
+offset_top = 24.0
+offset_right = 28.0
+offset_bottom = 37.0
+theme_override_colors/font_color = Color(0.9373, 0.8941, 0.7843, 1)
+theme_override_font_sizes/font_size = 10
+text = "Tab : carnet"
+horizontal_alignment = 2
+
+[node name="BarrePlantes" type="Control" parent="Interface" node_paths=PackedStringArray("gojo")]
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = -18.0
+offset_right = 62.0
+offset_bottom = -6.0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("15_barre")
+gojo = NodePath("../../Gojo")
+
+[node name="Nom" type="Label" parent="Interface/BarrePlantes"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = -1.0
+offset_right = 200.0
+offset_bottom = 12.0
+theme_override_colors/font_color = Color(0.9373, 0.8941, 0.7843, 1)
+theme_override_font_sizes/font_size = 10
+
+[node name="Invite" type="Label" parent="Interface" node_paths=PackedStringArray("gojo")]
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -34.0
+offset_right = 80.0
+offset_bottom = -21.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.9490, 0.7569, 0.3059, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+script = ExtResource("16_invite")
+gojo = NodePath("../../Gojo")
+
+[node name="InterfaceCarnet" parent="Interface" instance=ExtResource("17_carnet")]
