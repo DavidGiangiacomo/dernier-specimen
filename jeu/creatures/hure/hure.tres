@@ -4,5 +4,10 @@
 
 [resource]
 script = ExtResource("1_script")
-nom_de_terrain = "Hure des souches"
+nom_de_terrain = "Spécimen H-01"
+description_avant = "Suidé massif. Charge sans provocation. Valeur d'étude moyenne."
+nom_veritable = "La hure des souches"
+description_apres = "Elle ne chargeait pas par méchanceté : chaque pas lui faisait mal."
+observations = Array[String](["Charge en ligne droite dès qu'on approche.", "Ne s'arrête qu'en heurtant un obstacle.", "Une épine plantée dans l'épaule. Elle boite."])
+cle = "Retirer l'épine, au gant."
 couleur = Color(0.47843137, 0.32156864, 0.19607843, 1)

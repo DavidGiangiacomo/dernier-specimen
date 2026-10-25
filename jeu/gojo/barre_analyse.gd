@@ -7,7 +7,12 @@ const RAYON := 5.0
 const EPAISSEUR := 2.0
 
 @export var couleur_fond := Color(0.0, 0.0, 0.0, 0.5)
-@export var couleur_remplie := Color("8fe3ff")
+## Couleur de la partie remplie (Gojo la change : bleue pour une analyse, dorée pour une clé).
+@export var couleur_remplie := Color("8fe3ff"):
+	set(valeur):
+		if valeur != couleur_remplie:
+			couleur_remplie = valeur
+			queue_redraw()
 
 ## De 0 (vide) à 1 (analyse réussie).
 var progression := 0.0:

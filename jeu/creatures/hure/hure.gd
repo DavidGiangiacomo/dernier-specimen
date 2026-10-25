@@ -1,11 +1,13 @@
 extends CharacterBody2D
-## La hure des souches, version jalon 1 : un ennemi qui fonce.
+## La hure des souches : un ennemi qui fonce, et qui a mal.
 ##
 ## Elle erre, repère Gojo, se prépare, puis charge en ligne droite.
 ## Si elle heurte une souche ou un mur, elle reste étourdie un moment.
 ## Sa charge ne fait mal que pendant qu'elle fonce.
+## Sa clé (jalon 3) : une épine fichée dans l'épaule, à retirer au gant. Sans l'épine,
+## elle est apaisée : elle se promène sans plus jamais charger.
 
-enum Etat { ERRANCE, PREPARATION, CHARGE, ETOURDIE, REPOS }
+enum Etat { ERRANCE, PREPARATION, CHARGE, ETOURDIE, REPOS, APAISEE }
 
 ## Marge pour les arrondis sur les durées.
 const MARGE_ARRONDI := 0.001
@@ -47,6 +49,8 @@ const LARGEUR_BARRE := 16.0
 @export var couleur_preparation := Color("c0452f")
 ## Couleur quand elle est étourdie.
 @export var couleur_etourdie := Color("a89a8a")
+## Couleur une fois apaisée.
+@export var couleur_apaisee := Color("a07a52")
 
 var etat := Etat.ERRANCE
 var pv := 0
@@ -60,11 +64,15 @@ var _gojo: Node2D
 @onready var _barre_pv: ColorRect = $BarreFond/BarrePv
 @onready var _hurtbox: Hurtbox = $Hurtbox
 @onready var _hitbox_charge: Hitbox = $HitboxCharge
+@onready var _analysable: Analysable = $Analysable
+@onready var _epine: ColorRect = $Corps/Epine
+@onready var _barre_fond: ColorRect = $BarreFond
 
 
 func _ready() -> void:
 	pv = pv_max
 	_hurtbox.touchee.connect(_on_touchee)
+	_analysable.cle_appliquee.connect(_apaiser)
 	_gojo = get_tree().get_first_node_in_group("gojo")
 	_changer_etat(Etat.ERRANCE)
 
@@ -93,11 +101,15 @@ func _physics_process(delta: float) -> void:
 		Etat.REPOS:
 			if _temps_ecoule(duree_repos):
 				_changer_etat(Etat.ERRANCE)
+		Etat.APAISEE:
+			if _temps_ecoule(duree_pas_errance):
+				_changer_etat(Etat.APAISEE)
 
 	if etat == Etat.CHARGE:
 		velocity = _direction * vitesse_charge
 	else:
-		var vitesse_visee := _direction * vitesse_errance if etat == Etat.ERRANCE else Vector2.ZERO
+		var se_promene := etat == Etat.ERRANCE or etat == Etat.APAISEE
+		var vitesse_visee := _direction * vitesse_errance if se_promene else Vector2.ZERO
 		velocity = velocity.move_toward(vitesse_visee, freinage * delta)
 
 	move_and_slide()
@@ -112,7 +124,7 @@ func _physics_process(delta: float) -> void:
 func _changer_etat(nouvel_etat: Etat) -> void:
 	etat = nouvel_etat
 	_temps_etat = 0.0
-	if etat == Etat.ERRANCE:
+	if etat == Etat.ERRANCE or etat == Etat.APAISEE:
 		# Une fois sur deux elle s'arrête, sinon elle part dans une direction au hasard.
 		_direction = Vector2.ZERO if randf() < 0.5 else Vector2.RIGHT.rotated(randf() * TAU)
 
@@ -123,6 +135,15 @@ func _voit_gojo() -> bool:
 
 func _temps_ecoule(duree: float) -> bool:
 	return _temps_etat >= duree - MARGE_ARRONDI
+
+
+## L'épine est retirée : elle n'a plus mal, et n'a plus de raison de charger.
+func _apaiser() -> void:
+	_changer_etat(Etat.APAISEE)
+	velocity = Vector2.ZERO
+	_hurtbox.invincible = true
+	_epine.visible = false
+	_barre_fond.visible = false
 
 
 func _on_touchee(hitbox: Hitbox) -> void:
@@ -144,6 +165,8 @@ func _mettre_a_jour_apparence() -> void:
 		_corps.position.x += 1.0 if posmod(Engine.get_physics_frames(), 4) < 2 else -1.0
 	elif etat == Etat.ETOURDIE:
 		couleur = couleur_etourdie
+	elif etat == Etat.APAISEE:
+		couleur = couleur_apaisee
 	if _temps_eclat > MARGE_ARRONDI:
 		couleur = Color.WHITE
 	_corps.color = couleur

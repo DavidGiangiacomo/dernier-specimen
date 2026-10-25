@@ -5,6 +5,7 @@ extends CharacterBody2D
 ## Jalon 0 : déplacement en huit directions, roulade et caméra.
 ## Jalon 1 : coup de bâton, PV, recul et invincibilité après un coup.
 ## Jalon 2 : le gant, qui analyse au contact en tenant le bouton.
+## Jalon 3 : page complète, le même geste applique la clé et apaise la créature.
 ## Toutes les valeurs @export se règlent dans l'inspecteur, sans toucher au code.
 ## Ce sont des points de départ : elles seront toutes fausses au premier test.
 
@@ -21,6 +22,9 @@ const CENTRE := Vector2(0, -12)
 const MARGE_ARRONDI := 0.001
 ## Durée du flash blanc quand Gojo est touché, en secondes.
 const DUREE_ECLAT := 0.1
+## Couleur de la main et de la barre pour une analyse, puis pour une clé.
+const COULEUR_ANALYSE := Color("8fe3ff")
+const COULEUR_CLE := Color("f2c14e")
 
 @export_group("Marche")
 ## Vitesse de marche, en pixels par seconde.
@@ -79,7 +83,9 @@ var _temps_coup := 0.0
 var _temps_avant_coup := 0.0
 var _temps_eclat := 0.0
 var _progression_analyse := 0.0
-var _espece_analysee: Espece
+var _cible: Analysable
+## Vrai si le gant applique la clé (page complète) plutôt que d'analyser.
+var _applique_cle := false
 ## Après une analyse réussie, il faut relâcher le bouton avant d'en commencer une autre.
 var _attendre_relache := false
 var _temps_eclat_gant := 0.0
@@ -121,7 +127,7 @@ func _physics_process(delta: float) -> void:
 		elif Input.is_action_just_pressed("attaque") and _temps_avant_coup <= MARGE_ARRONDI:
 			_commencer_coup()
 		elif Input.is_action_pressed("analyse") and not _attendre_relache and _cible_au_contact():
-			_commencer_analyse(_cible_au_contact().espece)
+			_commencer_analyse(_cible_au_contact())
 
 	match etat:
 		Etat.MARCHE:
@@ -183,34 +189,40 @@ func _ranger_baton() -> void:
 	_hitbox_baton.active = false
 
 
-## La première zone analysable touchée par le gant dont la page n'est pas encore complète.
+## La première zone touchée par le gant qui a encore quelque chose à offrir :
+## une page à remplir, ou, une fois la page complète, une clé à appliquer.
 func _cible_au_contact() -> Analysable:
 	for zone in _zone_contact.get_overlapping_areas():
 		var cible := zone as Analysable
-		if cible and cible.espece and not Carnet.est_complete(cible.espece):
+		if cible and cible.espece and (not Carnet.est_complete(cible.espece) or cible.cle_disponible):
 			return cible
 	return null
 
 
-func _commencer_analyse(espece: Espece) -> void:
+func _commencer_analyse(cible: Analysable) -> void:
 	etat = Etat.ANALYSE
-	_espece_analysee = espece
+	_cible = cible
+	_applique_cle = Carnet.est_complete(cible.espece)
 	_progression_analyse = 0.0
 
 
 ## Tant que le bouton est tenu, la barre se remplit au contact et redescend sans contact.
-## Bouton relâché : l'analyse est annulée.
+## Bouton relâché : l'analyse est annulée. Barre pleine : une ligne de plus dans le carnet,
+## ou, si la page était complète, la clé est appliquée.
 func _analyser(direction: Vector2, delta: float) -> void:
-	if not Input.is_action_pressed("analyse"):
+	if not Input.is_action_pressed("analyse") or not is_instance_valid(_cible):
 		_arreter_analyse()
 		_marcher(direction, delta)
 		return
-	var cible := _cible_au_contact()
-	var au_contact := cible != null and cible.espece == _espece_analysee
+	var au_contact := _zone_contact.overlaps_area(_cible)
 	_progression_analyse += (delta if au_contact else -delta) / maxf(duree_analyse, 0.001)
 	_marcher(direction, delta, vitesse_pendant_analyse)
 	if _progression_analyse >= 1.0 - MARGE_ARRONDI:
-		Carnet.ajouter_analyse(_espece_analysee)
+		if _applique_cle:
+			_cible.appliquer_cle()
+			Carnet.marquer_apaisee(_cible.espece)
+		else:
+			Carnet.ajouter_analyse(_cible.espece)
 		_temps_eclat_gant = DUREE_ECLAT * 2.0
 		_attendre_relache = true
 		_arreter_analyse()
@@ -221,7 +233,7 @@ func _analyser(direction: Vector2, delta: float) -> void:
 func _arreter_analyse() -> void:
 	etat = Etat.MARCHE
 	_progression_analyse = 0.0
-	_espece_analysee = null
+	_cible = null
 
 
 func _on_touchee(hitbox: Hitbox) -> void:
@@ -265,8 +277,15 @@ func _mettre_a_jour_apparence() -> void:
 	_baton.rotation = direction_regard.angle()
 	_gant.rotation = direction_regard.angle()
 	# La main s'allume quand elle touche quelque chose d'analysable, et brille pendant l'analyse.
-	_main.visible = etat == Etat.ANALYSE or _temps_eclat_gant > MARGE_ARRONDI or (etat == Etat.MARCHE and _cible_au_contact() != null)
+	# Bleue pour analyser, dorée quand la page est complète et que la clé peut être appliquée.
+	var cible := _cible if etat == Etat.ANALYSE else _cible_au_contact()
+	var vers_la_cle := _applique_cle if etat == Etat.ANALYSE else (cible != null and Carnet.est_complete(cible.espece))
+	_main.visible = etat == Etat.ANALYSE or _temps_eclat_gant > MARGE_ARRONDI or (etat == Etat.MARCHE and cible != null)
 	_main.modulate.a = 1.0 if etat == Etat.ANALYSE or _temps_eclat_gant > MARGE_ARRONDI else 0.4
-	_main.color = Color.WHITE if _temps_eclat_gant > MARGE_ARRONDI else Color("8fe3ff")
+	if _temps_eclat_gant > MARGE_ARRONDI:
+		_main.color = Color.WHITE
+	else:
+		_main.color = COULEUR_CLE if vers_la_cle else COULEUR_ANALYSE
+	_barre_analyse.couleur_remplie = COULEUR_CLE if _applique_cle else COULEUR_ANALYSE
 	_barre_analyse.progression = _progression_analyse
 	_repere_regard.position = CENTRE + direction_regard * 8.0 - _repere_regard.size / 2.0
