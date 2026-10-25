@@ -7,6 +7,7 @@ RPG d'action en vue de dessus où l'on progresse en comprenant les monstres plut
 | [`jeu/`](jeu/) | Le projet Godot du jeu. |
 | [`docs/game-design-document.md`](docs/game-design-document.md) | Le Game Design Document, la version de référence à faire évoluer. |
 | [`BOCAL_A_IDEES.md`](BOCAL_A_IDEES.md) | Le bocal à idées : toutes les idées qui ne sont pas dans le GDD, listées par date. |
+| [`docs/fiches/fiches_alessio.pdf`](docs/fiches/fiches_alessio.pdf) | Les fiches d'Alessio, à imprimer en A4 : créatures, plantes, personnages, dialogues, plan de la zone, dessins, équilibrage, tests, décisions. |
 | [`docs/archives/game-design-document-v1.pdf`](docs/archives/game-design-document-v1.pdf) | Le PDF d'origine de la v1 (24 octobre 2026), figé. |
 
 ## Lancer le jeu
@@ -53,6 +54,8 @@ Les dégâts et le recul d'un coup se règlent sur sa hitbox : `Baton/Hitbox` po
 Les plantes de l'herbier (`jeu/plantes/*.tres`) ont en plus une rubrique *Plante* : leur effet, et le nom et la couleur qu'elles ont avant d'être analysées (la mousse-de-lune et la ronce-rouge se ressemblent).
 
 Tous les textes sont provisoires, tirés du GDD : c'est à Alessio de les réécrire d'après ses fiches.
+
+**Les fiches à remplir** sont dans [`docs/fiches/`](docs/fiches/) : le PDF à imprimer, et sa source `fiches_alessio.html`. Chaque fiche montre en gris le texte actuel du jeu, et dit où taper la version d'Alessio. Pour réimprimer après une modification du HTML : l'ouvrir dans Chrome, *Imprimer*, format A4, avec les graphiques d'arrière-plan.
 
 ## Le Bois des Souches
 
