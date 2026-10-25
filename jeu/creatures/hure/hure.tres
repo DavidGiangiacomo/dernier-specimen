@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="Espece" format=3]
+
+[ext_resource type="Script" path="res://carnet/espece.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+nom_de_terrain = "Hure des souches"
+couleur = Color(0.47843137, 0.32156864, 0.19607843, 1)

@@ -20,15 +20,19 @@ RPG d'action en vue de dessus où l'on progresse en comprenant les monstres plut
 | Se déplacer | Flèches, ou Z Q S D (W A S D sur un clavier QWERTY) | Stick gauche ou croix |
 | Roulade | Espace | A (croix sur PlayStation) |
 | Coup de bâton | J ou X | X (carré sur PlayStation) |
+| Analyser (tenir, au contact) | K ou C | B (rond sur PlayStation) |
 
 **Régler les valeurs**, sans toucher au code : ouvrir la scène, cliquer sur le premier nœud, et changer les valeurs dans l'inspecteur.
 
 | Scène | Nœud | Rubriques |
 | --- | --- | --- |
-| `jeu/gojo/gojo.tscn` | Gojo | *Marche*, *Roulade*, *Bâton*, *Vie* |
+| `jeu/gojo/gojo.tscn` | Gojo | *Marche*, *Roulade*, *Bâton*, *Gant*, *Vie* |
 | `jeu/creatures/hure/hure.tscn` | Hure | *Vie*, *Errance*, *Charge* |
+| `jeu/carnet/carnet.tscn` | Carnet | *Analyses par page* |
 
 Les dégâts et le recul d'un coup se règlent sur sa hitbox : `Baton/Hitbox` pour Gojo, `HitboxCharge` pour la hure. L'invincibilité après un coup se règle sur la `Hurtbox` de chacun.
+
+**Les espèces** du carnet sont des fichiers `.tres` à remplir dans l'inspecteur, par exemple `jeu/creatures/hure/hure.tres` : nom de terrain et couleur provisoire pour l'instant. Les observations et la clé arriveront au jalon 3.
 
 ## Faire évoluer le document
 
