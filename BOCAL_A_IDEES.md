@@ -41,3 +41,9 @@ Qu'il y ait plus tard des quêtes de capture.
 **Qui** : Alessio
 
 Une phase de gestion pour améliorer le village des gobelins. On pourrait recruter des PNJ pour nous y aider.
+
+### 2026-10-25 — Un inventaire et des armes différentes
+
+**Qui** : Alessio
+
+Ce serait bien d'avoir un inventaire et des armes différentes.
