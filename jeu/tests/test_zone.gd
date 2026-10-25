@@ -66,12 +66,15 @@ func test_quete_complete() -> void:
 	var pv_min: int = gojo.pv
 	var temps := 0.0
 	var pv_gobelins_intacts := true
+	var image := 0
 	while zone.etape == zone.Etape.REFLEXE and temps < 20.0:
-		# Gojo se défend comme il peut.
-		if gojo.etat == gojo.Etat.MARCHE and Engine.get_physics_frames() % 20 == 0:
+		# Gojo se défend comme il peut, un coup toutes les 20 images. Les images sont comptées
+		# depuis le début du combat, pour qu'il se joue pareil sur toutes les machines.
+		if gojo.etat == gojo.Etat.MARCHE and image % 20 == 0:
 			Input.action_press("attaque")
-		elif Engine.get_physics_frames() % 20 == 2:
+		elif image % 20 == 2:
 			Input.action_release("attaque")
+		image += 1
 		await attendre(1)
 		temps += 1.0 / 60.0
 		pv_min = mini(pv_min, gojo.pv)
@@ -85,12 +88,24 @@ func test_quete_complete() -> void:
 	verifier("plus de PV minimum après le combat", gojo.pv_minimum == 0)
 
 	section("Beat 3 : le camp")
+	# Gojo suit le chemin en revenant au milieu : le combat a pu le repousser au bord,
+	# et tout droit il buterait contre un buisson.
+	var milieu_du_chemin: float = zone.get_node("Camp/EntreeCamp").global_position.y
 	Input.action_press("droite")
 	temps = 0.0
 	while zone.etape != zone.Etape.CAMP and temps < 8.0:
+		var ecart: float = milieu_du_chemin - gojo.global_position.y
+		if ecart > 2.0:
+			Input.action_press("bas")
+		else:
+			Input.action_release("bas")
+		if ecart < -2.0:
+			Input.action_press("haut")
+		else:
+			Input.action_release("haut")
 		await attendre(1)
 		temps += 1.0 / 60.0
-	Input.action_release("droite")
+	relacher_tout()
 	verifier("en suivant le chemin, Gojo arrive au camp", zone.etape == zone.Etape.CAMP, "%.1f s" % temps)
 	lues = await lire_dialogue()
 	verifier("arrivée : 2 lignes, et Gojo reprend des forces", lues == 2 and gojo.pv == 6, "%d lignes, pv %d" % [lues, gojo.pv])
