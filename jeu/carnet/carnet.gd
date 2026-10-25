@@ -7,8 +7,10 @@ extends Node
 ## Émis à chaque changement d'une page : analyse réussie, ou espèce apaisée.
 signal page_changee(espece: Espece, analyses: int)
 
-## Analyses réussies pour compléter une page. Le chiffre qui décide du rythme de toute la tranche.
+## Analyses réussies pour compléter la page d'une créature. Le chiffre qui décide du rythme de toute la tranche.
 @export var analyses_par_page := 3
+## Analyses pour compléter la page d'une plante de l'herbier.
+@export var analyses_par_plante := 1
 
 var _analyses := {}
 var _apaisees := {}
@@ -20,11 +22,17 @@ func analyses(espece: Espece) -> int:
 	return _analyses.get(espece, 0)
 
 
+## Le nombre d'analyses qui complète la page de cette espèce.
+func analyses_requises(espece: Espece) -> int:
+	return analyses_par_plante if espece is EspecePlante else analyses_par_page
+
+
 func est_complete(espece: Espece) -> bool:
-	return analyses(espece) >= analyses_par_page
+	return analyses(espece) >= analyses_requises(espece)
 
 
-## Vrai quand une créature de cette espèce a été apaisée : la page parle alors en langage humain.
+## Vrai quand Gojo a compris l'espèce (une créature apaisée, ou les gobelins soignés) :
+## la page parle alors en langage humain.
 func est_apaisee(espece: Espece) -> bool:
 	return _apaisees.get(espece, false)
 
@@ -43,8 +51,10 @@ func ajouter_analyse(espece: Espece) -> void:
 
 
 func marquer_apaisee(espece: Espece) -> void:
-	if not est_complete(espece) or est_apaisee(espece):
+	if est_apaisee(espece):
 		return
+	if not _ordre.has(espece):
+		_ordre.append(espece)
 	_apaisees[espece] = true
 	page_changee.emit(espece, analyses(espece))
 

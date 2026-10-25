@@ -1,0 +1,123 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://creatures/gobelin/gobelin.gd" id="1_script"]
+[ext_resource type="Script" path="res://combat/hitbox.gd" id="2_hitbox"]
+[ext_resource type="Script" path="res://combat/hurtbox.gd" id="3_hurtbox"]
+[ext_resource type="Script" path="res://carnet/analysable.gd" id="4_analysable"]
+[ext_resource type="Script" path="res://interaction/interactif.gd" id="5_interactif"]
+[ext_resource type="Resource" path="res://creatures/gobelin/gobelin.tres" id="6_espece"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pieds"]
+size = Vector2(12, 6)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_corps"]
+size = Vector2(18, 18)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_coup"]
+size = Vector2(14, 14)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_parler"]
+radius = 12.0
+
+[node name="Gobelin" type="CharacterBody2D"]
+collision_layer = 4
+motion_mode = 1
+script = ExtResource("1_script")
+
+[node name="Corps" type="ColorRect" parent="."]
+offset_left = -8.0
+offset_top = -18.0
+offset_right = 8.0
+mouse_filter = 2
+color = Color(0.43529412, 0.6039216, 0.2901961, 1)
+
+[node name="Taches" type="Control" parent="Corps"]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+
+[node name="Tache1" type="ColorRect" parent="Corps/Taches"]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 2.0
+offset_right = 5.0
+offset_bottom = 4.0
+mouse_filter = 2
+color = Color(0.09019608, 0.08235294, 0.07058824, 1)
+
+[node name="Tache2" type="ColorRect" parent="Corps/Taches"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 5.0
+offset_right = 12.0
+offset_bottom = 7.0
+mouse_filter = 2
+color = Color(0.09019608, 0.08235294, 0.07058824, 1)
+
+[node name="Tache3" type="ColorRect" parent="Corps/Taches"]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 2.0
+offset_right = 17.0
+offset_bottom = 4.0
+mouse_filter = 2
+color = Color(0.09019608, 0.08235294, 0.07058824, 1)
+
+[node name="RepereRegard" type="ColorRect" parent="."]
+offset_left = -1.0
+offset_top = -10.0
+offset_right = 1.0
+offset_bottom = -8.0
+mouse_filter = 2
+color = Color(0.11764706, 0.13725491, 0.09019608, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_pieds")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 8
+monitoring = false
+monitorable = false
+script = ExtResource("3_hurtbox")
+invincibilite_apres_coup = 0.3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(0, -9)
+shape = SubResource("RectangleShape2D_corps")
+
+[node name="Hitbox" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("2_hitbox")
+force_recul = 160.0
+active = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_coup")
+
+[node name="Interactif" type="Area2D" parent="."]
+collision_layer = 64
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_interactif")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactif"]
+position = Vector2(0, -8)
+shape = SubResource("CircleShape2D_parler")
+
+[node name="Analysable" type="Area2D" parent="."]
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+script = ExtResource("4_analysable")
+espece = ExtResource("6_espece")
+cle_disponible = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Analysable"]
+position = Vector2(0, -9)
+shape = SubResource("RectangleShape2D_corps")

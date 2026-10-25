@@ -7,11 +7,20 @@ extends Area2D
 
 ## Émis quand Gojo a appliqué la clé : c'est à la créature de réagir (se calmer, partir…).
 signal cle_appliquee
+## Émis à chaque analyse réussie sur cette zone (par exemple : analyser un malade ouvre la quête).
+signal analysee
 
 ## L'espèce dont la page se remplit quand on analyse cette zone.
 @export var espece: Espece
 ## Faux une fois la clé appliquée : on ne calme pas deux fois la même créature.
-var cle_disponible := true
+## Mis à faux dès le départ pour ce qui n'a pas de clé à appliquer au gant (plantes, gobelins).
+@export var cle_disponible := true
+## Vrai pour une zone qu'on peut analyser même quand la page est complète (un malade, avant la quête).
+@export var toujours_analysable := false
+
+
+func marquer_analysee() -> void:
+	analysee.emit()
 
 
 func appliquer_cle() -> void:

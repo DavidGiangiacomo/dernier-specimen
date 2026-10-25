@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EspecePlante" format=3]
+
+[ext_resource type="Script" path="res://plantes/espece_plante.gd" id="1_cx5hb"]
+
+[resource]
+script = ExtResource("1_cx5hb")
+effet = 2
+nom_apparent = "Mousse bleutée"
+couleur_apparente = Color(0.49803922, 0.627451, 0.56078434, 1)
+nom_de_terrain = "Ronce-rouge"
+description_avant = "Fausse mousse, aux tiges fines et rougeâtres."
+observations = Array[String](["Toxique. Ressemble beaucoup à la mousse-de-lune."])
+couleur = Color(0.7607843, 0.28235295, 0.24313726, 1)

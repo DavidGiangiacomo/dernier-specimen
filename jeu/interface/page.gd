@@ -41,7 +41,7 @@ func _on_page_changee(espece: Espece, analyses: int) -> void:
 func _draw() -> void:
 	if _espece == null:
 		return
-	var lignes := Carnet.analyses_par_page
+	var lignes := Carnet.analyses_requises(_espece)
 	var page := Rect2(0, 0, LARGEUR, 10 + lignes * 4)
 	if _analyses >= lignes:
 		draw_rect(page.grow(1), couleur_complete)

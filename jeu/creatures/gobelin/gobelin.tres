@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Espece" format=3]
+
+[ext_resource type="Script" path="res://carnet/espece.gd" id="1_3ky8d"]
+
+[resource]
+script = ExtResource("1_3ky8d")
+nom_de_terrain = "Spécimen G-04"
+description_avant = "Humanoïde de petite taille, agressivité en meute, valeur d'étude faible."
+nom_veritable = "Greg et les siens"
+description_apres = "Greg a peur du feu depuis l'incendie. Il cache de la nourriture pour sa sœur."
+observations = Array[String](["Ils s'entraident : trois sont venus défendre le premier.", "Beaucoup sont malades : fièvre et taches noires.", "Ils parlent une langue qui n'est pas la leur."])
+cle = "Partager de la nourriture au lieu de dégainer."
+couleur = Color(0.43529412, 0.6039216, 0.2901961, 1)

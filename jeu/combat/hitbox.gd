@@ -6,6 +6,9 @@ extends Area2D
 ## « coups de Gojo » pour Gojo, « coups des créatures » pour les créatures.
 ## Chaque cible n'est touchée qu'une fois par coup, même si le coup dure longtemps.
 
+## Émis quand le coup porte.
+signal a_touche(hurtbox: Hurtbox)
+
 ## PV retirés à ce qui est touché.
 @export var degats := 1
 ## Vitesse donnée à la cible pour la faire reculer, en pixels par seconde.
@@ -27,3 +30,4 @@ func peut_toucher(hurtbox: Hurtbox) -> bool:
 
 func noter_touchee(hurtbox: Hurtbox) -> void:
 	_deja_touchees.append(hurtbox)
+	a_touche.emit(hurtbox)

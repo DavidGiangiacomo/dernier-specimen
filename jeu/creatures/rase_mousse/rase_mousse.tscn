@@ -1,0 +1,91 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://creatures/rase_mousse/rase_mousse.gd" id="1_script"]
+[ext_resource type="Script" path="res://combat/hitbox.gd" id="2_hitbox"]
+[ext_resource type="Script" path="res://combat/hurtbox.gd" id="3_hurtbox"]
+[ext_resource type="Script" path="res://carnet/analysable.gd" id="4_analysable"]
+[ext_resource type="Script" path="res://interaction/interactif.gd" id="5_interactif"]
+[ext_resource type="Resource" path="res://creatures/rase_mousse/rase_mousse.tres" id="6_espece"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pieds"]
+size = Vector2(6, 4)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_corps"]
+size = Vector2(12, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_morsure"]
+size = Vector2(10, 8)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pollen"]
+radius = 14.0
+
+[node name="RaseMousse" type="CharacterBody2D" groups=["rase_mousses"]]
+collision_layer = 4
+motion_mode = 1
+script = ExtResource("1_script")
+
+[node name="Ombre" type="ColorRect" parent="."]
+offset_left = -4.0
+offset_top = -2.0
+offset_right = 4.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.3)
+
+[node name="Corps" type="ColorRect" parent="."]
+offset_left = -5.0
+offset_top = -12.0
+offset_right = 5.0
+offset_bottom = -6.0
+mouse_filter = 2
+color = Color(0.654902, 0.72156864, 0.5411765, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -2)
+shape = SubResource("RectangleShape2D_pieds")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 8
+monitorable = false
+script = ExtResource("3_hurtbox")
+invincibilite_apres_coup = 0.2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(0, -9)
+shape = SubResource("RectangleShape2D_corps")
+
+[node name="Hitbox" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("2_hitbox")
+force_recul = 100.0
+active = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+position = Vector2(0, -9)
+shape = SubResource("RectangleShape2D_morsure")
+
+[node name="Interactif" type="Area2D" parent="."]
+collision_layer = 64
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_interactif")
+verbe = "souffler le pollen"
+actif = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactif"]
+position = Vector2(0, -8)
+shape = SubResource("CircleShape2D_pollen")
+
+[node name="Analysable" type="Area2D" parent="."]
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+script = ExtResource("4_analysable")
+espece = ExtResource("6_espece")
+cle_disponible = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Analysable"]
+position = Vector2(0, -9)
+shape = SubResource("RectangleShape2D_corps")

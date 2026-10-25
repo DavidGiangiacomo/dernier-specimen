@@ -34,6 +34,8 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	if Dialogue.en_cours:
+		return
 	if Input.is_action_just_pressed("carnet"):
 		if visible:
 			fermer()
@@ -92,12 +94,14 @@ func _afficher() -> void:
 	for etiquette in [_titre, _description]:
 		etiquette.add_theme_color_override("font_color", encre)
 
-	var lignes := _lignes_observation(Carnet.analyses_par_page)
+	var lignes := _lignes_observation(Carnet.analyses_requises(espece))
 	for i in lignes.size():
 		var decouverte := i < analyses and i < espece.observations.size()
 		lignes[i].text = "%d. %s" % [i + 1, espece.observations[i] if decouverte else "· · ·"]
 		lignes[i].add_theme_color_override("font_color", encre if decouverte else encre_effacee)
 
+	# Les plantes de l'herbier n'ont pas de clé.
+	_cle.visible = not (espece is EspecePlante)
 	if Carnet.est_complete(espece):
 		_cle.text = "Clé : " + espece.cle
 		_cle.add_theme_color_override("font_color", encre_cle)

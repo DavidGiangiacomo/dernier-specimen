@@ -6,6 +6,8 @@ extends CharacterBody2D
 ## Jalon 1 : coup de bâton, PV, recul et invincibilité après un coup.
 ## Jalon 2 : le gant, qui analyse au contact en tenant le bouton.
 ## Jalon 3 : page complète, le même geste applique la clé et apaise la créature.
+## Jalon 4 : agir avec ce qui est proche (E), la sacoche de plantes, et ce dont la zone a besoin :
+## un bâton à ramasser, des PV qui ne descendent pas sous un minimum, la reprise après un K.O.
 ## Toutes les valeurs @export se règlent dans l'inspecteur, sans toucher au code.
 ## Ce sont des points de départ : elles seront toutes fausses au premier test.
 
@@ -13,6 +15,8 @@ extends CharacterBody2D
 signal pv_changes(pv: int, pv_max: int)
 ## Émis quand Gojo tombe à 0 PV. C'est le niveau qui décide de la suite.
 signal ko
+## Émis quand l'invite change (« E : cueillir »), ou devient vide.
+signal invite_changee(texte: String)
 
 enum Etat { MARCHE, ROULADE, ATTAQUE, ANALYSE, KO }
 
@@ -45,6 +49,8 @@ const COULEUR_CLE := Color("f2c14e")
 @export var recharge_roulade := 0.6
 
 @export_group("Bâton")
+## Faux au début de la zone : Gojo ramasse le bâton ferré dans la clairière.
+@export var a_le_baton := true
 ## Temps minimum entre le début de deux coups, en secondes.
 @export var cadence_attaque := 0.35
 ## Durée pendant laquelle le coup fait mal et Gojo reste sur place, en secondes.
@@ -70,6 +76,8 @@ const COULEUR_CLE := Color("f2c14e")
 
 var etat := Etat.MARCHE
 var pv := 0
+## Les coups ne font pas descendre les PV en dessous (1 pendant le combat du réflexe).
+var pv_minimum := 0
 ## Vrai au début de la roulade : les coups ne passent pas.
 var invincible_en_roulade := false
 ## La dernière direction dans laquelle Gojo a bougé.
@@ -89,6 +97,10 @@ var _applique_cle := false
 ## Après une analyse réussie, il faut relâcher le bouton avant d'en commencer une autre.
 var _attendre_relache := false
 var _temps_eclat_gant := 0.0
+var _invite := ""
+## La touche « interagir » était-elle tenue à l'image précédente ? Gojo détecte lui-même l'appui :
+## pendant un dialogue il est en pause, donc la touche qui ferme la boîte ne le fait pas agir.
+var _interagir_tenu := false
 
 @onready var _corps: ColorRect = $Corps
 @onready var _repere_regard: ColorRect = $RepereRegard
@@ -99,6 +111,8 @@ var _temps_eclat_gant := 0.0
 @onready var _zone_contact: Area2D = $Gant/ZoneContact
 @onready var _main: ColorRect = $Gant/Main
 @onready var _barre_analyse: Node2D = $BarreAnalyse
+@onready var _zone_interaction: Area2D = $ZoneInteraction
+@onready var sacoche: Sacoche = $Sacoche
 
 
 func _ready() -> void:
@@ -114,6 +128,11 @@ func _physics_process(delta: float) -> void:
 	_temps_eclat_gant = maxf(_temps_eclat_gant - delta, 0.0)
 	if not Input.is_action_pressed("analyse"):
 		_attendre_relache = false
+	if Input.is_action_just_pressed("changer_plante") and etat != Etat.KO:
+		sacoche.choisir_suivante()
+	var interagir_tenu := Input.is_action_pressed("interagir")
+	var interagir_appuye := interagir_tenu and not _interagir_tenu
+	_interagir_tenu = interagir_tenu
 
 	if etat == Etat.ROULADE and _temps_ecoule(_temps_roulade, duree_roulade):
 		_finir_roulade()
@@ -124,10 +143,12 @@ func _physics_process(delta: float) -> void:
 		_temps_recharge = maxf(_temps_recharge - delta, 0.0)
 		if Input.is_action_just_pressed("roulade") and _temps_recharge <= MARGE_ARRONDI:
 			_commencer_roulade(direction)
-		elif Input.is_action_just_pressed("attaque") and _temps_avant_coup <= MARGE_ARRONDI:
+		elif Input.is_action_just_pressed("attaque") and a_le_baton and _temps_avant_coup <= MARGE_ARRONDI:
 			_commencer_coup()
 		elif Input.is_action_pressed("analyse") and not _attendre_relache and _cible_au_contact():
 			_commencer_analyse(_cible_au_contact())
+		elif interagir_appuye and not Dialogue.attendre_relache and _interactif_proche():
+			_interactif_proche().utiliser(self)
 
 	match etat:
 		Etat.MARCHE:
@@ -147,6 +168,32 @@ func _physics_process(delta: float) -> void:
 	_hurtbox.invincible = invincible_en_roulade or etat == Etat.KO
 	move_and_slide()
 	_mettre_a_jour_apparence()
+
+
+## Rend tous les PV (le repos au camp).
+func soigner() -> void:
+	pv = pv_max
+	pv_changes.emit(pv, pv_max)
+
+
+## Après un K.O. : Gojo repart d'un point de reprise, avec tous ses PV et ses plantes.
+func revivre(point_de_reprise: Vector2) -> void:
+	global_position = point_de_reprise
+	reset_physics_interpolation()
+	velocity = Vector2.ZERO
+	etat = Etat.MARCHE
+	soigner()
+
+
+## Le plus proche de ce avec quoi Gojo peut agir, ou null.
+func _interactif_proche() -> Interactif:
+	var meilleur: Interactif = null
+	for zone in _zone_interaction.get_overlapping_areas():
+		var interactif := zone as Interactif
+		if interactif and interactif.actif:
+			if meilleur == null or global_position.distance_squared_to(interactif.global_position) < global_position.distance_squared_to(meilleur.global_position):
+				meilleur = interactif
+	return meilleur
 
 
 func _marcher(direction: Vector2, delta: float, vitesse := vitesse_marche) -> void:
@@ -194,7 +241,7 @@ func _ranger_baton() -> void:
 func _cible_au_contact() -> Analysable:
 	for zone in _zone_contact.get_overlapping_areas():
 		var cible := zone as Analysable
-		if cible and cible.espece and (not Carnet.est_complete(cible.espece) or cible.cle_disponible):
+		if cible and cible.espece and (not Carnet.est_complete(cible.espece) or cible.cle_disponible or cible.toujours_analysable):
 			return cible
 	return null
 
@@ -202,7 +249,7 @@ func _cible_au_contact() -> Analysable:
 func _commencer_analyse(cible: Analysable) -> void:
 	etat = Etat.ANALYSE
 	_cible = cible
-	_applique_cle = Carnet.est_complete(cible.espece)
+	_applique_cle = Carnet.est_complete(cible.espece) and cible.cle_disponible
 	_progression_analyse = 0.0
 
 
@@ -223,6 +270,7 @@ func _analyser(direction: Vector2, delta: float) -> void:
 			Carnet.marquer_apaisee(_cible.espece)
 		else:
 			Carnet.ajouter_analyse(_cible.espece)
+			_cible.marquer_analysee()
 		_temps_eclat_gant = DUREE_ECLAT * 2.0
 		_attendre_relache = true
 		_arreter_analyse()
@@ -240,7 +288,7 @@ func _on_touchee(hitbox: Hitbox) -> void:
 	if etat == Etat.ANALYSE:
 		# Un coup reçu vide la barre : l'analyse est perdue.
 		_arreter_analyse()
-	pv = maxi(pv - hitbox.degats, 0)
+	pv = maxi(pv - hitbox.degats, pv_minimum)
 	pv_changes.emit(pv, pv_max)
 	velocity = (global_position - hitbox.global_position).normalized() * hitbox.force_recul
 	_temps_eclat = DUREE_ECLAT
@@ -279,7 +327,7 @@ func _mettre_a_jour_apparence() -> void:
 	# La main s'allume quand elle touche quelque chose d'analysable, et brille pendant l'analyse.
 	# Bleue pour analyser, dorée quand la page est complète et que la clé peut être appliquée.
 	var cible := _cible if etat == Etat.ANALYSE else _cible_au_contact()
-	var vers_la_cle := _applique_cle if etat == Etat.ANALYSE else (cible != null and Carnet.est_complete(cible.espece))
+	var vers_la_cle := _applique_cle if etat == Etat.ANALYSE else (cible != null and Carnet.est_complete(cible.espece) and cible.cle_disponible)
 	_main.visible = etat == Etat.ANALYSE or _temps_eclat_gant > MARGE_ARRONDI or (etat == Etat.MARCHE and cible != null)
 	_main.modulate.a = 1.0 if etat == Etat.ANALYSE or _temps_eclat_gant > MARGE_ARRONDI else 0.4
 	if _temps_eclat_gant > MARGE_ARRONDI:
@@ -288,4 +336,10 @@ func _mettre_a_jour_apparence() -> void:
 		_main.color = COULEUR_CLE if vers_la_cle else COULEUR_ANALYSE
 	_barre_analyse.couleur_remplie = COULEUR_CLE if _applique_cle else COULEUR_ANALYSE
 	_barre_analyse.progression = _progression_analyse
+
+	var interactif := _interactif_proche() if etat == Etat.MARCHE else null
+	var invite := interactif.invite() if interactif else ""
+	if invite != _invite:
+		_invite = invite
+		invite_changee.emit(_invite)
 	_repere_regard.position = CENTRE + direction_regard * 8.0 - _repere_regard.size / 2.0

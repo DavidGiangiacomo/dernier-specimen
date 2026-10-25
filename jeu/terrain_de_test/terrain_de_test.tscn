@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://terrain_de_test/terrain_de_test.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://gojo/gojo.tscn" id="2_gojo"]
-[ext_resource type="PackedScene" path="res://terrain_de_test/souche.tscn" id="3_souche"]
+[ext_resource type="PackedScene" path="res://zone/souche.tscn" id="3_souche"]
 [ext_resource type="PackedScene" path="res://creatures/hure/hure.tscn" id="4_hure"]
 [ext_resource type="Script" path="res://interface/coeurs.gd" id="5_coeurs"]
 [ext_resource type="Script" path="res://interface/page.gd" id="6_page"]

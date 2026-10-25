@@ -30,7 +30,8 @@ func vient_d_etre_touchee() -> bool:
 
 func _physics_process(delta: float) -> void:
 	_temps_invincibilite = maxf(_temps_invincibilite - delta, 0.0)
-	if est_invincible():
+	# Une hurtbox désactivée (un gobelin du camp, par exemple) ne peut pas être touchée.
+	if est_invincible() or not monitoring:
 		return
 	for zone in get_overlapping_areas():
 		var hitbox := zone as Hitbox
