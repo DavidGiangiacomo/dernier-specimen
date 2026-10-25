@@ -47,3 +47,9 @@ Une phase de gestion pour améliorer le village des gobelins. On pourrait recrut
 **Qui** : Alessio
 
 Ce serait bien d'avoir un inventaire et des armes différentes.
+
+### 2026-10-25 — Une réputation auprès des gobelins
+
+**Qui** : Alessio
+
+Un système de réputation, qui baisserait quand on attaque les gobelins du village. En v1, on ne peut pas les attaquer.

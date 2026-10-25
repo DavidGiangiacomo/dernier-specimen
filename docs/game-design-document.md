@@ -32,8 +32,8 @@ Cinq personnages suffisent à la tranche verticale, et un seul objet porte tout 
 | --- | --- | --- | --- |
 | **Gojo** | Savant-magicien d'un futur proche, exilé mille ans en arrière | Au départ : compléter son carnet. À la fin : prouver qu'il s'est trompé | Personnage joueur |
 | **Le Dieu des monstres** | Grand humanoïde non armé, en colère, triste, surtout déçu des humains | Que quelqu'un, enfin, regarde ses créatures au lieu de les compter | Intro, puis silhouette muette en lisière de forêt |
-| **Le gobelin épargné** *(nom à donner)* | Le premier gobelin que Gojo attaque — et qui le sauve ensuite | Que l'étranger reparte, puis qu'il soigne les siens | Guide vers le camp, premier visage ami |
-| **La doyenne du camp** *(nom à donner)* | Ancienne gobeline, soigne les malades sans y arriver | Des plantes, et qu'on lui foute la paix | Donne la quête, valide les remèdes |
+| **Greg**, le gobelin épargné | Le premier gobelin que Gojo attaque — et qui le sauve ensuite | Que l'étranger reparte, puis qu'il soigne les siens | Guide vers le camp, premier visage ami |
+| **Lila**, la doyenne du camp | Ancienne gobeline, soigne les malades sans y arriver | Des plantes, et qu'on lui foute la paix | Donne la quête, valide les remèdes |
 | **Garin Corbe** | Chasseur de primes humain, carnet à la ceinture | Être payé. Il n'a rien contre les gobelins en particulier | Boss de la tranche |
 
 ### Les gants d'analyse
@@ -355,16 +355,16 @@ Rien dans cette section ne bloque le démarrage : le jalon 0 peut commencer ce s
 
 ### Décisions à prendre
 
-| Question | Qui tranche | Avant quel jalon |
-| --- | --- | --- |
-| Nom et apparence précise du Dieu des monstres | Ton fils | 6 |
-| Noms du gobelin épargné et de la doyenne | Ton fils | 4 |
-| Les gobelins du camp sont-ils attaquables ? | Vous deux | 4 |
-| Le Dieu apparaît-il en silhouette pendant la tranche ? | Vous deux | 5 |
-| Garder le nom « Gojo » | Ton fils | 6 |
-| Titre définitif | Vous deux | après 6 |
+| Question | Qui tranche | Avant quel jalon | Décision |
+| --- | --- | --- | --- |
+| Nom et apparence précise du Dieu des monstres | Ton fils | 6 | |
+| Noms du gobelin épargné et de la doyenne | Ton fils | 4 | Greg et Lila |
+| Les gobelins du camp sont-ils attaquables ? | Vous deux | 4 | Non, pas en v1 |
+| Le Dieu apparaît-il en silhouette pendant la tranche ? | Vous deux | 5 | |
+| Garder le nom « Gojo » | Ton fils | 6 | |
+| Titre définitif | Vous deux | après 6 | |
 
-**Sur les gobelins attaquables** — recommandation : non, pas de boîte de collision du tout dans le camp. Permettre de frapper des alliés oblige à gérer un état « le camp vous rejette » qui coûte cher et que presque personne ne verra.
+**Sur les gobelins attaquables** — recommandation : non, pas de boîte de collision du tout dans le camp. Permettre de frapper des alliés oblige à gérer un état « le camp vous rejette » qui coûte cher et que presque personne ne verra. *Décidé : non pour la v1. Un système de réputation part dans le bocal à idées.*
 
 **Sur la silhouette du Dieu** — recommandation : oui. Un sprite immobile, aperçu deux ou trois fois en lisière, qui disparaît quand on s'approche. Zéro mécanique, gros effet d'ambiance.
 
