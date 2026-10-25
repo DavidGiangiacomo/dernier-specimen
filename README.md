@@ -61,6 +61,31 @@ La zone de la tranche verticale est dans `jeu/zone/` :
 - **La carte** (`carte.tscn`) : deux couches de tuiles, *Sol* et *Obstacles*, à repeindre avec l'éditeur de TileMap de Godot. Les tuiles sont provisoires (`tuiles/tuiles_provisoires.png`) ; arbres, buissons et huttes bloquent le passage.
 - **Le déroulé** (`bois_des_souches.tscn`) : Greg, Lila, les villageois, les malades, la hure, les rase-mousses, les plantes, les ronces des passages à sens unique. Les répliques de la quête se réécrivent dans l'inspecteur du nœud *BoisDesSouches*, rubrique *Répliques* ; celles de chaque gobelin, dans son propre inspecteur. Une réplique s'écrit `Nom : texte`, ou sans nom pour une description.
 
+## Tests automatiques
+
+Des scripts jouent le jeu à notre place, sans fenêtre : ils appuient sur les touches, laissent passer les images, puis vérifient ce qui s'est passé (PV, position, étape de la quête, pages du carnet…).
+
+| Fichier | Ce qu'il vérifie |
+| --- | --- |
+| `jeu/tests/test_terrain.gd` | Jalons 0 à 3, sur le terrain de test : déplacement, roulade, combat contre la hure, analyse au gant, carnet, clé |
+| `jeu/tests/test_zone.gd` | Jalon 4 : la quête du Bois des Souches de bout en bout, les rase-mousses, l'analyse d'une plante dans la main |
+
+**Sur GitHub**, ils tournent tout seuls à chaque pull request et à chaque push sur `main` (onglet *Actions*, ou les voyants en bas de la PR). Une PR au voyant rouge a cassé quelque chose.
+
+**Sur l'ordinateur**, depuis le dossier du dépôt (Linux ou macOS) :
+
+```sh
+GODOT=/chemin/vers/Godot_v4.7.2 ./jeu/tests/lancer.sh
+```
+
+ou un seul fichier, sur n'importe quel système :
+
+```sh
+godot --headless --path jeu --script res://tests/test_zone.gd
+```
+
+Chaque vérification affiche `OK` ou `ECHEC`. Les tests de la zone prennent leurs repères sur les personnages et les objets de la scène, pas sur des coordonnées : on peut les déplacer sans casser les tests. En revanche, changer une règle du jeu (une durée, des dégâts, un nombre d'analyses) peut faire échouer un test qui la vérifie : c'est voulu, il suffit alors de mettre le test à jour.
+
 ## Faire évoluer le document
 
 - **Modifier le GDD** : sur GitHub, ouvrir `docs/game-design-document.md`, cliquer sur le crayon, modifier, puis « Commit changes » avec un message qui dit ce qui change (par exemple « Nomme la doyenne »).
