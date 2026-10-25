@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://creatures/hure/hure.tscn" id="4_hure"]
 [ext_resource type="Script" path="res://interface/coeurs.gd" id="5_coeurs"]
 [ext_resource type="Script" path="res://interface/page.gd" id="6_page"]
+[ext_resource type="PackedScene" path="res://carnet/interface_carnet.tscn" id="7_carnet"]
 
 [node name="TerrainDeTest" type="Node2D" node_paths=PackedStringArray("camera", "gojo")]
 y_sort_enabled = true
@@ -56,3 +57,16 @@ offset_bottom = 28.0
 grow_horizontal = 0
 mouse_filter = 2
 script = ExtResource("6_page")
+
+[node name="AideCarnet" type="Label" parent="Interface/Page"]
+layout_mode = 0
+offset_left = -44.0
+offset_top = 24.0
+offset_right = 28.0
+offset_bottom = 37.0
+theme_override_colors/font_color = Color(0.9372549, 0.89411765, 0.78431374, 1)
+theme_override_font_sizes/font_size = 10
+text = "Tab : carnet"
+horizontal_alignment = 2
+
+[node name="InterfaceCarnet" parent="Interface" instance=ExtResource("7_carnet")]
