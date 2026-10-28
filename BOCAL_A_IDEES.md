@@ -53,3 +53,9 @@ Ce serait bien d'avoir un inventaire et des armes différentes.
 **Qui** : Alessio
 
 Un système de réputation, qui baisserait quand on attaque les gobelins du village. En v1, on ne peut pas les attaquer.
+
+### 2026-10-28 — La voix du dieu des bêtes
+
+**Qui** : Alessio
+
+Avoir la voix du dieu des bêtes qui te parle, t'aide ou te juge, pendant le tutoriel (ou après ?).
