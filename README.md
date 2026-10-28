@@ -25,7 +25,7 @@ RPG d'action en vue de dessus où l'on progresse en comprenant les monstres plut
 | Analyser, ou appliquer la clé (tenir, au contact) ; sans rien toucher, analyser la plante choisie dans la sacoche | K ou C | B (rond sur PlayStation) |
 | Ouvrir ou fermer le carnet (jeu en pause) | Tab ou I | Select |
 | Tourner les pages du carnet | Gauche, droite | Gauche, droite |
-| Parler, ramasser, cueillir, donner la plante choisie, souffler le pollen | E ou Entrée | Y (triangle sur PlayStation) |
+| Parler, ramasser, cueillir, donner la plante choisie, souffler le pollen, tendre le carnet | E ou Entrée | Y (triangle sur PlayStation) |
 | Changer de plante choisie | R | RB (R1 sur PlayStation) |
 | Passer à la ligne suivante d'un dialogue | E ou Entrée | Y |
 
@@ -37,12 +37,13 @@ RPG d'action en vue de dessus où l'on progresse en comprenant les monstres plut
 | `jeu/creatures/hure/hure.tscn` | Hure | *Vie*, *Errance*, *Charge* |
 | `jeu/creatures/rase_mousse/rase_mousse.tscn` | RaseMousse | *Vie*, *Nuée*, *Pollen* |
 | `jeu/creatures/gobelin/gobelin.tscn` | Gobelin | vitesses, durée et recharge des coups |
+| `jeu/creatures/garin/garin.tscn` | Garin | *Vie*, *Phase 1 : l'arbalète*, *Phase 2 : la lame*, *Pollen* |
 | `jeu/carnet/carnet.tscn` | Carnet | *Analyses par page*, *Analyses par plante* |
-| `jeu/zone/bois_des_souches.tscn` | BoisDesSouches | *Combat du réflexe*, *Reprise*, *Répliques* |
+| `jeu/zone/bois_des_souches.tscn` | BoisDesSouches | *Combat du réflexe*, *Reprise*, *Le boss*, *Répliques*, *Fin provisoire* |
 
-Les dégâts et le recul d'un coup se règlent sur sa hitbox : `Baton/Hitbox` pour Gojo, `HitboxCharge` pour la hure. L'invincibilité après un coup se règle sur la `Hurtbox` de chacun.
+Les dégâts et le recul d'un coup se règlent sur sa hitbox : `Baton/Hitbox` pour Gojo, `HitboxCharge` pour la hure, `Lame/Hitbox` pour Garin. Les carreaux et les pièges de Garin ont leur propre scène (`carreau.tscn` : vitesse et durée de vol ; `piege.tscn`). L'invincibilité après un coup se règle sur la `Hurtbox` de chacun.
 
-**Les espèces** du carnet sont des fichiers `.tres` à remplir dans l'inspecteur, à partir de la fiche de créature du GDD, par exemple `jeu/creatures/hure/hure.tres` :
+**Les espèces** du carnet sont des fichiers `.tres` à remplir dans l'inspecteur, à partir de la fiche de créature du GDD, par exemple `jeu/creatures/hure/hure.tres` ou `jeu/creatures/garin/garin.tres` :
 
 | Rubrique | Champs | Quand la page les montre |
 | --- | --- | --- |
@@ -62,7 +63,9 @@ Tous les textes sont provisoires, tirés du GDD : c'est à Alessio de les rééc
 La zone de la tranche verticale est dans `jeu/zone/` :
 
 - **La carte** (`carte.tscn`) : deux couches de tuiles, *Sol* et *Obstacles*, à repeindre avec l'éditeur de TileMap de Godot. Les tuiles sont provisoires (`tuiles/tuiles_provisoires.png`) ; arbres, buissons et huttes bloquent le passage.
-- **Le déroulé** (`bois_des_souches.tscn`) : Greg, Lila, les villageois, les malades, la hure, les rase-mousses, les plantes, les ronces des passages à sens unique. Les répliques de la quête se réécrivent dans l'inspecteur du nœud *BoisDesSouches*, rubrique *Répliques* ; celles de chaque gobelin, dans son propre inspecteur. Une réplique s'écrit `Nom : texte`, ou sans nom pour une description.
+- **Le déroulé** (`bois_des_souches.tscn`) : Greg, Lila, les villageois, les malades, la hure, les rase-mousses, les plantes, les ronces des passages à sens unique, puis la lisière et Garin Corbe. Les répliques de la quête se réécrivent dans l'inspecteur du nœud *BoisDesSouches*, rubrique *Répliques* ; celles de chaque gobelin, dans son propre inspecteur. Une réplique s'écrit `Nom : texte`, ou sans nom pour une description.
+- **La lisière** : elle s'ouvre dès que Lila donne la quête (rubrique *Le boss* : on peut choisir qu'elle n'ouvre qu'une fois le camp soigné). On y entre sans retour possible avant la fin du combat. Garin tire à l'arbalète et pose des pièges, puis passe à la lame à mi-vie ; le pollen de fleur-trompette l'endort un court moment. Si le camp a été soigné, Greg et la meute viennent en renfort au début de la phase 2. À 0 PV, Garin tombe à genoux : page incomplète, il s'enfuit (fin ouverte) ; page complète, Gojo lui tend le carnet (E), et Garin laisse sa torche et sa liste de primes (la fin du carnet). Un écran de fin provisoire l'annonce, en attendant celui du jalon 6.
+- **Le Dieu des monstres** (`jeu/dieu/silhouette.tscn`) : une silhouette muette, aperçue à la clairière d'arrivée et au vieux chêne, puis une dernière fois à la lisière après le départ de Garin. Elle s'efface quand Gojo s'approche, et ne revient pas.
 
 ## Tests automatiques
 
@@ -71,7 +74,7 @@ Des scripts jouent le jeu à notre place, sans fenêtre : ils appuient sur les t
 | Fichier | Ce qu'il vérifie |
 | --- | --- |
 | `jeu/tests/test_terrain.gd` | Jalons 0 à 3, sur le terrain de test : déplacement, roulade, combat contre la hure, analyse au gant, carnet, clé |
-| `jeu/tests/test_zone.gd` | Jalon 4 : la quête du Bois des Souches de bout en bout, les rase-mousses, l'analyse d'une plante dans la main |
+| `jeu/tests/test_zone.gd` | Jalons 4 et 5 : la tranche jouée du début à la fin, jusqu'à Garin et la fin du carnet ; Garin affronté sans avoir soigné le camp (K.O., fin ouverte) ; les rase-mousses, l'analyse d'une plante dans la main, les silhouettes du Dieu |
 
 **Sur GitHub**, ils tournent tout seuls à chaque pull request et à chaque push sur `main` (onglet *Actions*, ou les voyants en bas de la PR). Une PR au voyant rouge a cassé quelque chose.
 
@@ -87,7 +90,7 @@ ou un seul fichier, sur n'importe quel système :
 godot --headless --path jeu --script res://tests/test_zone.gd
 ```
 
-Chaque vérification affiche `OK` ou `ECHEC`. Les tests de la zone prennent leurs repères sur les personnages et les objets de la scène, pas sur des coordonnées : on peut les déplacer sans casser les tests. En revanche, changer une règle du jeu (une durée, des dégâts, un nombre d'analyses) peut faire échouer un test qui la vérifie : c'est voulu, il suffit alors de mettre le test à jour.
+Chaque vérification affiche `OK` ou `ECHEC`. Le hasard du jeu (les pas de la hure, le vol des rase-mousses) fait les mêmes tirages à chaque lancement : un test qui échoue échoue à chaque fois. Les tests de la zone prennent leurs repères sur les personnages et les objets de la scène, pas sur des coordonnées : on peut les déplacer sans casser les tests. En revanche, changer une règle du jeu (une durée, des dégâts, un nombre d'analyses) peut faire échouer un test qui la vérifie : c'est voulu, il suffit alors de mettre le test à jour.
 
 ## Faire évoluer le document
 

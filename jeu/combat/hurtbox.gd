@@ -3,7 +3,8 @@ extends Area2D
 ## Une zone qui peut être touchée. Elle prévient son propriétaire quand une hitbox active la touche.
 ##
 ## Après un coup, elle ne peut plus être touchée pendant un moment :
-## c'est ce qui évite de perdre tous ses PV d'un seul contact.
+## c'est ce qui évite de perdre tous ses PV d'un seul contact. Un coup qui ne fait pas mal
+## (les gobelins du renfort sur Garin) ne la protège pas.
 
 signal touchee(hitbox: Hitbox)
 
@@ -37,6 +38,7 @@ func _physics_process(delta: float) -> void:
 		var hitbox := zone as Hitbox
 		if hitbox and hitbox.peut_toucher(self):
 			hitbox.noter_touchee(self)
-			_temps_invincibilite = invincibilite_apres_coup
+			if hitbox.degats > 0:
+				_temps_invincibilite = invincibilite_apres_coup
 			touchee.emit(hitbox)
 			return
