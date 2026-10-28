@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Espece" format=3]
+
+[ext_resource type="Script" path="res://carnet/espece.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+nom_de_terrain = "Le chasseur"
+description_avant = "Humain adulte, armé d'une arbalète et d'une lame. Hostile. Menace directe pour le camp."
+nom_veritable = "Garin Corbe"
+description_apres = "Il chasse pour la prime, pas par haine. Depuis une morsure, il a peur."
+observations = Array[String](["Il est payé : une prime pour le camp des gobelins.", "Une vieille morsure à l'avant-bras. Il a déjà été mordu.", "Ses mains tremblent quand il recharge. Il a peur."])
+cle = "Lui tendre le carnet, quand il est à terre."
+couleur = Color(0.41960785, 0.24705882, 0.18431373, 1)

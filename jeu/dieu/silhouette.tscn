@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://dieu/silhouette.gd" id="1_script"]
+
+[node name="Silhouette" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Visuel" type="Node2D" parent="."]
+modulate = Color(1, 1, 1, 0.85)
+
+[node name="Tete" type="Polygon2D" parent="Visuel"]
+color = Color(0.08235294, 0.06666667, 0.05490196, 1)
+polygon = PackedVector2Array(-2, -47, 2, -47, 4, -45, 4, -41, 2, -39, -2, -39, -4, -41, -4, -45)
+
+[node name="Corps" type="Polygon2D" parent="Visuel"]
+color = Color(0.08235294, 0.06666667, 0.05490196, 1)
+polygon = PackedVector2Array(-4, -39, 4, -39, 9, -37, 11, -30, 12, -18, 11, -8, 9, -8, 8, -18, 7, -24, 6, -12, 5, 0, 1, 0, 0, -14, -1, 0, -5, 0, -6, -12, -7, -24, -8, -18, -9, -8, -11, -8, -12, -18, -11, -30, -9, -37)

@@ -1,0 +1,161 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://creatures/garin/garin.gd" id="1_script"]
+[ext_resource type="Script" path="res://combat/hitbox.gd" id="2_hitbox"]
+[ext_resource type="Script" path="res://combat/hurtbox.gd" id="3_hurtbox"]
+[ext_resource type="Script" path="res://carnet/analysable.gd" id="4_analysable"]
+[ext_resource type="Script" path="res://interaction/interactif.gd" id="5_interactif"]
+[ext_resource type="Resource" path="res://creatures/garin/garin.tres" id="6_espece"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pieds"]
+size = Vector2(12, 6)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_corps"]
+size = Vector2(14, 22)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lame"]
+size = Vector2(16, 16)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_interactif"]
+radius = 20.0
+
+[node name="Garin" type="CharacterBody2D"]
+collision_layer = 4
+motion_mode = 1
+script = ExtResource("1_script")
+
+[node name="Torche" type="Node2D" parent="."]
+position = Vector2(-8, -10)
+
+[node name="Manche" type="ColorRect" parent="Torche"]
+offset_left = -1.0
+offset_top = -4.0
+offset_right = 1.0
+offset_bottom = 6.0
+mouse_filter = 2
+color = Color(0.36078432, 0.25490198, 0.16078432, 1)
+
+[node name="Flamme" type="ColorRect" parent="Torche"]
+offset_left = -2.0
+offset_top = -8.0
+offset_right = 2.0
+offset_bottom = -4.0
+mouse_filter = 2
+color = Color(0.9411765, 0.627451, 0.1882353, 1)
+
+[node name="Corps" type="ColorRect" parent="."]
+offset_left = -7.0
+offset_top = -22.0
+offset_right = 7.0
+mouse_filter = 2
+color = Color(0.41960785, 0.24705882, 0.18431373, 1)
+
+[node name="Chapeau" type="ColorRect" parent="Corps"]
+layout_mode = 0
+offset_left = -2.0
+offset_top = -3.0
+offset_right = 16.0
+offset_bottom = 1.0
+mouse_filter = 2
+color = Color(0.16470589, 0.12941177, 0.11372549, 1)
+
+[node name="RepereRegard" type="ColorRect" parent="."]
+offset_left = -1.0
+offset_top = -13.0
+offset_right = 1.0
+offset_bottom = -11.0
+mouse_filter = 2
+color = Color(0.11764706, 0.09019608, 0.07058824, 1)
+
+[node name="Arme" type="Node2D" parent="."]
+position = Vector2(0, -12)
+z_index = 1
+
+[node name="Arbalete" type="Node2D" parent="Arme"]
+
+[node name="Fut" type="ColorRect" parent="Arme/Arbalete"]
+offset_left = 2.0
+offset_top = -1.0
+offset_right = 12.0
+offset_bottom = 1.0
+mouse_filter = 2
+color = Color(0.4392157, 0.30588236, 0.19215687, 1)
+
+[node name="Arc" type="ColorRect" parent="Arme/Arbalete"]
+offset_left = 10.0
+offset_top = -5.0
+offset_right = 12.0
+offset_bottom = 5.0
+mouse_filter = 2
+color = Color(0.21960784, 0.18039216, 0.15294118, 1)
+
+[node name="Visee" type="Line2D" parent="Arme"]
+visible = false
+points = PackedVector2Array(12, 0, 170, 0)
+width = 1.0
+default_color = Color(0.95, 0.25, 0.2, 0.35)
+
+[node name="Lame" type="Node2D" parent="."]
+visible = false
+position = Vector2(0, -12)
+z_index = 1
+
+[node name="Visuel" type="ColorRect" parent="Lame"]
+offset_left = 6.0
+offset_top = -1.0
+offset_right = 18.0
+offset_bottom = 1.0
+mouse_filter = 2
+color = Color(0.78431374, 0.79607844, 0.8117647, 1)
+
+[node name="Hitbox" type="Area2D" parent="Lame"]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("2_hitbox")
+force_recul = 140.0
+active = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Lame/Hitbox"]
+position = Vector2(14, 0)
+shape = SubResource("RectangleShape2D_lame")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_pieds")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 8
+monitorable = false
+script = ExtResource("3_hurtbox")
+invincibilite_apres_coup = 0.3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(0, -11)
+shape = SubResource("RectangleShape2D_corps")
+
+[node name="Interactif" type="Area2D" parent="."]
+collision_layer = 64
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_interactif")
+verbe = "souffler le pollen"
+actif = false
+priorite = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactif"]
+position = Vector2(0, -10)
+shape = SubResource("CircleShape2D_interactif")
+
+[node name="Analysable" type="Area2D" parent="."]
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+script = ExtResource("4_analysable")
+espece = ExtResource("6_espece")
+cle_disponible = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Analysable"]
+position = Vector2(0, -11)
+shape = SubResource("RectangleShape2D_corps")

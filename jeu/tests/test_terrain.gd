@@ -455,11 +455,14 @@ func tests_cle() -> void:
 	hure.global_position = gojo.global_position + Vector2(40, 0)
 	var depart: Vector2 = hure.global_position
 	var a_charge := false
+	var plus_loin := 0.0
 	for i in 240:
 		await attendre(1)
 		a_charge = a_charge or hure.etat != hure.Etat.APAISEE or hure.get_node("HitboxCharge").active
+		plus_loin = maxf(plus_loin, hure.global_position.distance_to(depart))
 	verifier("apaisée, elle ne charge plus jamais (4 s à côté de Gojo)", not a_charge and gojo.pv == 6)
-	verifier("elle se promène", hure.global_position.distance_to(depart) > 1.0, "%.0f px" % hure.global_position.distance_to(depart))
+	# Elle choisit ses pas au hasard : on regarde jusqu'où elle est allée, pas où elle s'arrête.
+	verifier("elle se promène", plus_loin > 8.0, "%.0f px au plus loin" % plus_loin)
 
 	hure.global_position = gojo.global_position + Vector2(18, 0)
 	await attendre(2)

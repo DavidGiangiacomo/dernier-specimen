@@ -8,12 +8,16 @@ extends SceneTree
 
 ## Au-delà, le test est arrêté et compté comme raté (un test bloqué ne doit pas tourner sans fin).
 const DUREE_MAX := 180.0
+## Le hasard du jeu (les pas de la hure, le vol des rase-mousses) fait les mêmes tirages à chaque
+## lancement : un test qui échoue échoue à chaque fois, et on peut le rejouer pour comprendre.
+const GRAINE_DU_HASARD := 1
 
 var echecs := 0
 var reussites := 0
 
 
 func _initialize() -> void:
+	seed(GRAINE_DU_HASARD)
 	create_timer(DUREE_MAX).timeout.connect(_temps_depasse)
 	# Avant la première image, les scènes ajoutées ne sont pas encore prêtes.
 	await process_frame

@@ -1,12 +1,13 @@
 extends Node2D
-## Le Bois des Souches : la tranche verticale v1. Une forêt, six lieux, et pour ce jalon,
-## un objectif : soigner le camp des gobelins. La lisière et Garin Corbe arrivent au jalon 5.
+## Le Bois des Souches : la tranche verticale v1. Une forêt, six lieux, vingt minutes, et un seul
+## objectif : empêcher un homme de brûler un camp.
 ##
-## Ce script déroule les beats du GDD : l'arrivée, le réflexe, le camp, la cueillette, le remède.
+## Ce script déroule les beats du GDD : l'arrivée, le réflexe, le camp, la cueillette, le remède,
+## puis la lisière : Garin Corbe, le renfort des gobelins, et l'une des deux fins.
 ## Les répliques sont des listes à réécrire dans l'inspecteur (rubrique Répliques) :
 ## une ligne par réplique, « Nom : texte », ou sans nom pour une description.
 
-enum Etape { ARRIVEE, FOURRE, REFLEXE, VERS_LE_CAMP, CAMP, QUETE, GUERIS }
+enum Etape { ARRIVEE, FOURRE, REFLEXE, VERS_LE_CAMP, CAMP, QUETE, GUERIS, BOSS, FIN }
 
 @export_group("Combat du réflexe")
 ## Au-delà de cette durée, le combat s'arrête quoi qu'il arrive (le GDD : moins de quinze secondes).
@@ -19,6 +20,16 @@ enum Etape { ARRIVEE, FOURRE, REFLEXE, VERS_LE_CAMP, CAMP, QUETE, GUERIS }
 @export_group("Reprise")
 ## Temps entre un K.O. et la reprise au dernier point sûr, en secondes.
 @export var duree_avant_reprise := 1.5
+
+@export_group("Le boss")
+## Vrai : la lisière s'ouvre dès le début de la quête, et l'on peut affronter Garin sans avoir
+## soigné le camp (mais alors, sans renfort). Faux : elle ne s'ouvre qu'une fois le camp soigné.
+@export var lisiere_ouverte_des_la_quete := true
+## Dégâts d'un coup de gobelin du renfort sur Garin. Le GDD : ils ne font presque pas de dégâts,
+## ils font diversion.
+@export var degats_du_renfort := 0
+## Combien de temps l'écran de fin provisoire reste affiché, en secondes.
+@export var duree_fin := 6.0
 
 @export_group("Répliques")
 @export var repliques_baton: Array[String] = ["Un bâton ferré, abandonné dans l'herbe. Gojo le ramasse."]
@@ -56,12 +67,51 @@ enum Etape { ARRIVEE, FOURRE, REFLEXE, VERS_LE_CAMP, CAMP, QUETE, GUERIS }
 @export var repliques_lila_apres: Array[String] = ["Lila : Un homme rôde à la lisière. Avec du feu. Fais attention."]
 @export var repliques_greg_apres: Array[String] = ["Greg : Toi peux dormir au camp. Personne te tape."]
 @export var repliques_villageois_gueris: Array[String] = ["Gobelin : Merci, humain. Moi debout."]
+@export var repliques_avant_lisiere: Array[String] = [
+	"Une odeur de fumée vient de la lisière.",
+	"Une fois entré, pas de retour avant d'en avoir fini.",
+]
+@export var repliques_garin_arrivee: Array[String] = [
+	"Un homme entre dans la lisière, une torche à la main.",
+	"Garin : Garin Corbe, chasseur de primes. On me paie pour ce camp, pas pour toi.",
+	"Garin : Écarte-toi, l'étranger. Ou ne t'écarte pas.",
+]
+@export var repliques_garin_lame: Array[String] = ["Garin jette son arbalète et tire sa lame."]
+@export var repliques_renfort: Array[String] = ["Greg : Toi aidé nous. Maintenant, nous aider toi !"]
+@export var repliques_garin_a_terre: Array[String] = ["Garin tombe à genoux."]
+@export var repliques_fin_ouverte: Array[String] = [
+	"Garin : Tu crois avoir gagné ? Je reviendrai. Avec dix hommes.",
+	"Garin s'enfuit entre les arbres.",
+]
+@export var repliques_fin_du_carnet: Array[String] = [
+	"Gojo lui tend le carnet, ouvert à sa page.",
+	"Garin lit. Il se tait longtemps.",
+	"Garin laisse tomber sa torche, et s'en va.",
+]
+@export var repliques_liste_de_primes: Array[String] = [
+	"La liste de primes de Garin Corbe.",
+	"Des noms de créatures, et un prix en face de chacun.",
+	"Le camp des gobelins était en haut de la liste. Il en reste beaucoup d'autres.",
+]
+@export var repliques_lila_apres_garin: Array[String] = ["Lila : L'homme au feu, parti. Le camp se souviendra."]
+@export var repliques_greg_apres_garin: Array[String] = ["Greg : Toi rester. Toujours une place au camp."]
+
+@export_group("Fin provisoire")
+## La dernière ligne de l'écran de fin, en attendant le vrai écran du jalon 6.
+@export var texte_fin_du_carnet := "Garin est reparti sans sa torche."
+@export var texte_fin_ouverte := "Garin reviendra, avec dix hommes."
 
 var etape := Etape.ARRIVEE
+## Vrai une fois les malades soignés (on peut affronter Garin avant, ou après).
+var camp_gueri := false
+## Vrai si la tranche s'est finie par le carnet tendu à Garin.
+var fin_heureuse := false
 
 var _point_de_reprise := Vector2.ZERO
 var _temps_reflexe := 0.0
 var _temps_pres_de_greg := 0.0
+var _avertissement_fait := false
+var _renfort: Array[Gobelin] = []
 
 @onready var gojo: Gojo = $Gojo
 @onready var greg: Gobelin = $Fourre/Greg
@@ -73,6 +123,11 @@ var _temps_pres_de_greg := 0.0
 @onready var _ronces_camp: StaticBody2D = $Passages/RoncesCamp
 @onready var _ronces_lisiere: StaticBody2D = $Passages/RoncesLisiere
 @onready var _marqueurs: Node2D = $Marqueurs
+@onready var garin: Garin = $Lisiere/Garin
+@onready var _liste_de_primes: Node2D = $Lisiere/ListeDePrimes
+@onready var _barre_boss: Control = $Interface/BarreBoss
+@onready var _fin: Control = $Interface/Fin
+@onready var _silhouette_finale: Node2D = $Dieu/Silhouette3
 
 
 func _ready() -> void:
@@ -98,6 +153,15 @@ func _ready() -> void:
 	for malade: Gobelin in _malades:
 		malade.plante_proposee.connect(_on_plante_proposee)
 		malade.analysable.analysee.connect(_on_malade_analyse)
+
+	$Lisiere/AvantLisiere.body_entered.connect(_on_avant_lisiere)
+	$Lisiere/EntreeLisiere.body_entered.connect(_on_entree_lisiere)
+	garin.deuxieme_phase.connect(_on_garin_deuxieme_phase)
+	garin.a_terre.connect(_on_garin_a_terre)
+	garin.carnet_tendu.connect(_fin_du_carnet)
+	_liste_de_primes.get_node("Interactif").utilise.connect(_on_liste_ramassee)
+	_cacher(garin)
+	_cacher(_liste_de_primes)
 
 	_fermer(_ronces_fourre, false)
 	_fermer(_ronces_camp, true)
@@ -210,6 +274,8 @@ func _on_malade_analyse() -> void:
 	etape = Etape.QUETE
 	for malade: Gobelin in _malades:
 		malade.analysable.toujours_analysable = false
+	if lisiere_ouverte_des_la_quete:
+		_fermer(_ronces_lisiere, false)
 	lila.regard = Vector2.LEFT
 	await Dialogue.dire(repliques_quete)
 	lila.repliques = repliques_lila_pendant_quete
@@ -244,7 +310,7 @@ func _on_plante_proposee(malade: Gobelin, _gojo: Gojo) -> void:
 				await Dialogue.dire(repliques_capuchon)
 			else:
 				await Dialogue.dire(repliques_deja_soigne)
-	if not _reste_de_la_fievre() and not _reste_des_taches() and etape != Etape.GUERIS:
+	if not _reste_de_la_fievre() and not _reste_des_taches() and not camp_gueri:
 		await _guerison()
 
 
@@ -258,14 +324,120 @@ func _reste_des_taches() -> bool:
 
 ## Les malades se relèvent, le camp change d'attitude, et la page des gobelins change de ton.
 func _guerison() -> void:
-	etape = Etape.GUERIS
+	camp_gueri = true
+	# Le camp peut aussi être soigné après le départ de Garin.
+	if etape == Etape.QUETE:
+		etape = Etape.GUERIS
+		_fermer(_ronces_lisiere, false)
 	lila.regard = Vector2.DOWN
 	await Dialogue.dire(repliques_gueris)
 	Carnet.marquer_apaisee(greg.analysable.espece)
-	lila.repliques = repliques_lila_apres
-	greg.repliques = repliques_greg_apres
+	var garin_est_parti := etape == Etape.FIN
+	lila.repliques = repliques_lila_apres_garin if garin_est_parti else repliques_lila_apres
+	greg.repliques = repliques_greg_apres_garin if garin_est_parti else repliques_greg_apres
 	for malade: Gobelin in _malades:
 		malade.repliques = repliques_villageois_gueris
+
+
+# --- Beat 6 : la lisière ---------------------------------------------------------
+
+func _on_avant_lisiere(corps: Node2D) -> void:
+	var quete_en_cours := etape == Etape.QUETE or etape == Etape.GUERIS
+	if corps == gojo and quete_en_cours and not _ronces_lisiere.visible and not _avertissement_fait:
+		_avertissement_fait = true
+		Dialogue.dire(repliques_avant_lisiere)
+
+
+## Passage à sens unique : les ronces se referment, et Garin Corbe arrive avec sa torche.
+func _on_entree_lisiere(corps: Node2D) -> void:
+	if corps != gojo or not (etape == Etape.QUETE or etape == Etape.GUERIS):
+		return
+	etape = Etape.BOSS
+	_fermer(_ronces_lisiere, true)
+	_point_de_reprise = _marqueur("RepriseLisiere")
+	_montrer(garin, _marqueur("GarinEntree"))
+	garin.marcher_vers(_marqueur("GarinCombat"))
+	await garin.arrive
+	await Dialogue.dire(repliques_garin_arrivee)
+	_barre_boss.visible = true
+	garin.commencer_combat()
+
+
+## À mi-vie, Garin passe à la lame. Si les malades ont été soignés, les gobelins entrent
+## dans le combat : ils étaient venus sauver leur copain, ils viennent maintenant sauver Gojo.
+func _on_garin_deuxieme_phase() -> void:
+	await Dialogue.dire(repliques_garin_lame)
+	if not camp_gueri:
+		return
+	_renfort = [greg]
+	for embusque: Gobelin in _embusques:
+		_renfort.append(embusque)
+	for i in _renfort.size():
+		var gobelin := _renfort[i]
+		_montrer(gobelin, _marqueur("Renfort%d" % (i + 1)))
+		gobelin.passer_en_renfort(degats_du_renfort)
+		gobelin.attaquer(garin)
+	await Dialogue.dire(repliques_renfort)
+
+
+## Garin à terre : deux issues, selon que sa page est complète ou non.
+func _on_garin_a_terre() -> void:
+	_barre_boss.visible = false
+	for gobelin in _renfort:
+		gobelin.s_arreter()
+	await Dialogue.dire(repliques_garin_a_terre)
+	if Carnet.est_complete(garin.analysable.espece):
+		# Il attend : c'est Gojo qui lui tend le carnet (E).
+		garin.attendre_le_carnet()
+	else:
+		await Dialogue.dire(repliques_fin_ouverte)
+		garin.partir(_marqueur("GarinDepart"))
+		await garin.parti
+		_terminer(false)
+
+
+## Page complète : Garin lit, se tait, laisse tomber sa torche et s'en va.
+## Il laisse derrière lui sa liste de primes, le dernier objet de la tranche.
+func _fin_du_carnet() -> void:
+	await Dialogue.dire(repliques_fin_du_carnet)
+	Carnet.marquer_apaisee(garin.analysable.espece)
+	garin.lacher_torche()
+	_montrer(_liste_de_primes, garin.global_position + Vector2(8, 0))
+	garin.partir(_marqueur("GarinDepart"))
+
+
+func _on_liste_ramassee(_gojo: Gojo) -> void:
+	_cacher(_liste_de_primes)
+	await Dialogue.dire(repliques_liste_de_primes)
+	_terminer(true)
+
+
+## La tranche est finie : la lisière se rouvre, le renfort rentre au camp, et le Dieu des
+## monstres regarde une dernière fois, à l'orée du bois.
+func _terminer(heureuse: bool) -> void:
+	etape = Etape.FIN
+	fin_heureuse = heureuse
+	_fermer(_ronces_lisiere, false)
+	_point_de_reprise = _marqueur("RepriseCamp")
+	_rappeler_le_renfort()
+	if camp_gueri:
+		lila.repliques = repliques_lila_apres_garin
+		greg.repliques = repliques_greg_apres_garin
+	_silhouette_finale.apparaitre()
+	_fin.get_node("SousTitre").text = texte_fin_du_carnet if heureuse else texte_fin_ouverte
+	_fin.visible = true
+	await get_tree().create_timer(duree_fin, false).timeout
+	_fin.visible = false
+
+
+func _rappeler_le_renfort() -> void:
+	for i in _renfort.size():
+		var gobelin := _renfort[i]
+		gobelin.quitter_le_renfort()
+		gobelin.regard = Vector2.DOWN
+		var marqueur := "CampGreg" if gobelin == greg else "CampVillageois%d" % i
+		_montrer(gobelin, _marqueur(marqueur))
+	_renfort.clear()
 
 
 # --- Reprise après un K.O. -----------------------------------------------------
@@ -273,6 +445,11 @@ func _guerison() -> void:
 func _on_gojo_ko() -> void:
 	await get_tree().create_timer(duree_avant_reprise).timeout
 	gojo.revivre(_point_de_reprise)
+	# Tombé pendant le combat de boss : le combat recommence. Le carnet garde ses pages.
+	if etape == Etape.BOSS and garin.se_bat():
+		_rappeler_le_renfort()
+		garin.reinitialiser(_marqueur("GarinCombat"))
+		garin.commencer_combat()
 
 
 # --- Outils --------------------------------------------------------------------
@@ -287,14 +464,15 @@ func _fermer(ronces: StaticBody2D, ferme: bool) -> void:
 	ronces.get_node("CollisionShape2D").set_deferred("disabled", not ferme)
 
 
-func _cacher(gobelin: Gobelin) -> void:
-	gobelin.s_arreter()
-	gobelin.visible = false
-	gobelin.process_mode = Node.PROCESS_MODE_DISABLED
+func _cacher(noeud: Node2D) -> void:
+	if noeud is Gobelin:
+		noeud.s_arreter()
+	noeud.visible = false
+	noeud.process_mode = Node.PROCESS_MODE_DISABLED
 
 
-func _montrer(gobelin: Gobelin, position_depart: Vector2) -> void:
-	gobelin.global_position = position_depart
-	gobelin.reset_physics_interpolation()
-	gobelin.visible = true
-	gobelin.process_mode = Node.PROCESS_MODE_INHERIT
+func _montrer(noeud: Node2D, position_depart: Vector2) -> void:
+	noeud.global_position = position_depart
+	noeud.reset_physics_interpolation()
+	noeud.visible = true
+	noeud.process_mode = Node.PROCESS_MODE_INHERIT

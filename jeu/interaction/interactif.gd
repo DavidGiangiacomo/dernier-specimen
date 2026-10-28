@@ -13,6 +13,9 @@ signal utilise(gojo: Gojo)
 @export var touche := "E"
 ## Inactif, il n'apparaît plus dans l'invite.
 @export var actif := true
+## Quand plusieurs choses sont à portée, la plus prioritaire passe devant, sinon la plus proche
+## (tendre le carnet à Garin, plutôt que parler au gobelin d'à côté).
+@export var priorite := 0
 
 
 func invite() -> String:
