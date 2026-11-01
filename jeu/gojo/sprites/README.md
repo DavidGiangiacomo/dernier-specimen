@@ -18,10 +18,26 @@ conserver cet alignement.
 
 ## D'où ils viennent
 
-La vue de face a été dessinée au pixel près, puis validée. Les sept autres
-directions en ont été pivotées par PixelLab pour **1 seule génération**, parce
-que fournir la vue de face évite d'en payer la création (5 générations).
+**Deux directions sont dessinées à la main** : la vue de face, validée, et la
+vue de dos. Les six autres en ont été générées par PixelLab pour **1 seule
+génération** — fournir des directions déjà dessinées évite d'en payer la
+création, et fait baisser le prix à mesure qu'on en fournit.
+
+La vue de dos a dû être dessinée parce que la première tentative n'en avait
+pas : la vue de face ne montrait du sac que deux débords aux épaules, et une
+rotation ne peut faire pivoter que ce qui existe. De dos, le modèle reproduisait
+donc des épaulettes là où le sac devrait occuper tout le torse.
+
 La vue de face du jeu est au pixel identique à celle qui a été validée.
+
+### Le sac, par direction
+
+| Direction | Bas | Bas-D | Droite | Haut-D | Haut | Haut-G | Gauche | Bas-G |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Pixels de sac | 18 | 11 | 33 | 64 | **66** | 65 | 32 | 10 |
+
+Invisible de face — on n'en voit que les bretelles —, bosse nette de profil,
+dominant de dos. C'est la progression attendue d'un sac réellement porté.
 
 ## Le personnage
 
@@ -52,13 +68,15 @@ offset = Vector2(-16, -28)
 
 ## Ce qui reste à corriger, à l'œil
 
-- Les débords du sac aux épaules se lisent comme **des barres brunes
-  horizontales**, surtout de trois quarts. C'est le défaut hérité de la vue
-  de face, que la rotation a amplifié.
-- Les vues de profil (`east`, `west`) sont **nettement plus étroites**
-  (11-12 px contre 16-18) : Gojo paraît maigre de profil.
-- `north-west` montre une tache claire à l'emplacement du visage, qui n'a
-  rien à y faire sur une vue de dos.
+- **La vue de face garde ses deux débords bruns aux épaules.** Ils passaient
+  tant que le sac n'existait nulle part ; maintenant que les autres directions
+  en montrent un vrai, ces deux barres détonnent. C'est la vue validée, donc
+  elle n'a pas été touchée — mais elle mérite d'être reprise.
+- De trois quarts arrière (`north-east`, `north-west`), **le sac est si gros
+  que le corps disparaît derrière** : ça se lit comme une caisse brune sur
+  deux jambes.
+- De profil, le sac est posé **assez bas**, plutôt à hauteur de hanche que
+  de haut du dos.
 
 Pour corriger : ouvrir le fichier dans Pixelorama, charger
 `jeu/palette/palette.gpl`, ne peindre qu'avec ces couleurs, et garder les
