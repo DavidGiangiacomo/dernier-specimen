@@ -452,14 +452,24 @@ func tests_cle() -> void:
 
 	hure.distance_detection = 200.0
 	hure.vitesse_errance = 20.0
+	# À chaque pas, elle tire au sort entre s'arrêter et partir quelque part.
+	# Avec le pas par défaut de 1,2 s elle n'en tire que trois en quatre
+	# secondes, et reste donc parfaitement immobile une fois sur huit : le
+	# test échouait au hasard. Un pas plus court lui en fait tirer vingt.
+	hure.duree_pas_errance = 0.2
 	hure.global_position = gojo.global_position + Vector2(40, 0)
-	var depart: Vector2 = hure.global_position
+	# On mesure le chemin parcouru plutôt que le déplacement net : une
+	# promenade qui ramène à son point de départ reste une promenade.
+	var precedente: Vector2 = hure.global_position
+	var parcouru := 0.0
 	var a_charge := false
 	for i in 240:
 		await attendre(1)
+		parcouru += hure.global_position.distance_to(precedente)
+		precedente = hure.global_position
 		a_charge = a_charge or hure.etat != hure.Etat.APAISEE or hure.get_node("HitboxCharge").active
 	verifier("apaisée, elle ne charge plus jamais (4 s à côté de Gojo)", not a_charge and gojo.pv == 6)
-	verifier("elle se promène", hure.global_position.distance_to(depart) > 1.0, "%.0f px" % hure.global_position.distance_to(depart))
+	verifier("elle se promène", parcouru > 1.0, "%.0f px parcourus" % parcouru)
 
 	hure.global_position = gojo.global_position + Vector2(18, 0)
 	await attendre(2)
