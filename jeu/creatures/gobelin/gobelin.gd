@@ -3,8 +3,9 @@ extends CharacterBody2D
 ## Un gobelin du Bois des Souches : Greg, Lila, les villageois, les malades, la meute du fourré.
 ##
 ## C'est le déroulé de la zone (bois_des_souches.gd) qui lui dit quoi faire : rester là,
-## marcher vers un point, attaquer Gojo. Un gobelin n'a pas de PV. Dans le fourré, les coups
-## le font seulement reculer ; au camp, il n'a pas de hurtbox : on ne frappe pas ses alliés.
+## marcher vers un point, attaquer Gojo, ou attaquer Garin quand il vient en renfort.
+## Un gobelin n'a pas de PV. Dans le fourré, les coups le font seulement reculer ; au camp,
+## il n'a pas de hurtbox : on ne frappe pas ses alliés.
 
 ## Arrivé au bout de sa marche.
 signal arrive
@@ -52,6 +53,8 @@ const PORTEE_COUP := 18.0
 var etat := Etat.IMMOBILE
 ## Pendant une marche : s'arrêter pour attendre Gojo s'il traîne (Greg qui guide).
 var attendre_gojo := false
+## Ce qu'il attaque : Gojo pendant le réflexe, Garin pendant le renfort.
+var cible_attaque: Node2D
 
 var _destination := Vector2.ZERO
 var _temps_eclat := 0.0
@@ -59,6 +62,9 @@ var _temps_toux := 0.0
 var _temps_coup := 0.0
 var _temps_avant_coup := 0.0
 var _gojo: Gojo
+var _calque_des_coups := 0
+var _degats_des_coups := 0
+var _masque_de_la_hurtbox := 0
 
 @onready var _corps: ColorRect = $Corps
 @onready var _taches: Control = $Corps/Taches
@@ -71,6 +77,9 @@ var _gojo: Gojo
 
 func _ready() -> void:
 	_gojo = get_tree().get_first_node_in_group("gojo")
+	_calque_des_coups = _hitbox.collision_layer
+	_degats_des_coups = _hitbox.degats
+	_masque_de_la_hurtbox = _hurtbox.collision_mask
 	_hurtbox.touchee.connect(_on_touchee)
 	_interactif.utilise.connect(_on_utilise)
 	analysable.toujours_analysable = est_malade()
@@ -86,8 +95,9 @@ func marcher_vers(point: Vector2, guider := false) -> void:
 	attendre_gojo = guider
 
 
-func attaquer() -> void:
+func attaquer(cible: Node2D = null) -> void:
 	etat = Etat.ATTAQUE
+	cible_attaque = cible if cible else _gojo
 
 
 func s_arreter() -> void:
@@ -97,6 +107,25 @@ func s_arreter() -> void:
 ## Dans le fourré, le bâton le touche (sans lui faire de dégâts) ; au camp, non.
 func rendre_frappable(frappable: bool) -> void:
 	_hurtbox.set_deferred("monitoring", frappable)
+
+
+## En renfort contre Garin : ses coups touchent Garin (ils ne font presque pas mal, mais
+## Garin se retourne contre lui), et la lame de Garin le fait reculer.
+func passer_en_renfort(degats: int) -> void:
+	# Les calques s'échangent : ses coups deviennent des « coups de Gojo », et il reçoit
+	# les « coups des créatures ».
+	_hitbox.collision_layer = _masque_de_la_hurtbox
+	_hitbox.degats = degats
+	_hurtbox.collision_mask = _calque_des_coups
+	rendre_frappable(true)
+
+
+func quitter_le_renfort() -> void:
+	_hitbox.collision_layer = _calque_des_coups
+	_hitbox.degats = _degats_des_coups
+	_hurtbox.collision_mask = _masque_de_la_hurtbox
+	rendre_frappable(false)
+	s_arreter()
 
 
 func tousser() -> void:
@@ -137,11 +166,11 @@ func _physics_process(delta: float) -> void:
 				regard = trajet.normalized()
 				vitesse_visee = regard * vitesse
 		Etat.ATTAQUE:
-			if _gojo:
-				regard = global_position.direction_to(_gojo.global_position)
+			if is_instance_valid(cible_attaque):
+				regard = global_position.direction_to(cible_attaque.global_position)
 				vitesse_visee = regard * vitesse_attaque
 				# Assez près : il lance un coup, puis souffle un peu avant le suivant.
-				if _temps_avant_coup <= 0.0 and global_position.distance_to(_gojo.global_position) <= PORTEE_COUP:
+				if _temps_avant_coup <= 0.0 and global_position.distance_to(cible_attaque.global_position) <= PORTEE_COUP:
 					_temps_coup = duree_coup
 					_temps_avant_coup = duree_coup + recharge_coup
 	velocity = velocity.move_toward(vitesse_visee, 600.0 * delta)

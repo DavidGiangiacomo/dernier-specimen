@@ -360,13 +360,13 @@ Rien dans cette section ne bloque le démarrage : le jalon 0 peut commencer ce s
 | Nom et apparence précise du Dieu des monstres | Ton fils | 6 | |
 | Noms du gobelin épargné et de la doyenne | Ton fils | 4 | Greg et Lila |
 | Les gobelins du camp sont-ils attaquables ? | Vous deux | 4 | Non, pas en v1 |
-| Le Dieu apparaît-il en silhouette pendant la tranche ? | Vous deux | 5 | |
+| Le Dieu apparaît-il en silhouette pendant la tranche ? | Vous deux | 5 | Oui |
 | Garder le nom « Gojo » | Ton fils | 6 | |
 | Titre définitif | Vous deux | après 6 | |
 
 **Sur les gobelins attaquables** — recommandation : non, pas de boîte de collision du tout dans le camp. Permettre de frapper des alliés oblige à gérer un état « le camp vous rejette » qui coûte cher et que presque personne ne verra. *Décidé : non pour la v1. Un système de réputation part dans le bocal à idées.*
 
-**Sur la silhouette du Dieu** — recommandation : oui. Un sprite immobile, aperçu deux ou trois fois en lisière, qui disparaît quand on s'approche. Zéro mécanique, gros effet d'ambiance.
+**Sur la silhouette du Dieu** — recommandation : oui. Un sprite immobile, aperçu deux ou trois fois en lisière, qui disparaît quand on s'approche. Zéro mécanique, gros effet d'ambiance. *Décidé : oui. On l'aperçoit à la clairière d'arrivée, au vieux chêne, puis une dernière fois à la lisière, après le départ de Garin.*
 
 **Sur le nom « Gojo »** — à savoir avant de s'y attacher : c'est aussi le nom d'un personnage très connu de *Jujutsu Kaisen* ([Satoru Gojo](https://en.wikipedia.org/wiki/Satoru_Gojo)). Sans aucune importance pour un projet familial, et sans doute précisément pour ça qu'il a été choisi. À reconsidérer seulement si le jeu sortait du cercle familial un jour.
 

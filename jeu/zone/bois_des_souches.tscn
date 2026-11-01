@@ -18,6 +18,9 @@
 [ext_resource type="Script" path="res://interface/invite.gd" id="16_invite"]
 [ext_resource type="PackedScene" path="res://carnet/interface_carnet.tscn" id="17_carnet"]
 [ext_resource type="PackedScene" path="res://creatures/rase_mousse/rase_mousse.tscn" id="18_rase_mousse"]
+[ext_resource type="PackedScene" path="res://creatures/garin/garin.tscn" id="19_garin"]
+[ext_resource type="PackedScene" path="res://dieu/silhouette.tscn" id="20_silhouette"]
+[ext_resource type="Script" path="res://interface/barre_boss.gd" id="21_barre_boss"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ronces"]
 size = Vector2(16, 32)
@@ -27,6 +30,9 @@ size = Vector2(32, 160)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_baton"]
 radius = 10.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_seuil"]
+size = Vector2(16, 48)
 
 [node name="BoisDesSouches" type="Node2D"]
 y_sort_enabled = true
@@ -207,6 +213,65 @@ position = Vector2(760, 480)
 
 [node name="RaseMousse4" parent="Creux" instance=ExtResource("18_rase_mousse")]
 position = Vector2(792, 472)
+
+[node name="Lisiere" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="AvantLisiere" type="Area2D" parent="Lisiere"]
+position = Vector2(952, 288)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Lisiere/AvantLisiere"]
+shape = SubResource("RectangleShape2D_seuil")
+
+[node name="EntreeLisiere" type="Area2D" parent="Lisiere"]
+position = Vector2(1000, 288)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Lisiere/EntreeLisiere"]
+shape = SubResource("RectangleShape2D_entree")
+
+[node name="Garin" parent="Lisiere" instance=ExtResource("19_garin")]
+position = Vector2(1196, 296)
+
+[node name="ListeDePrimes" type="Node2D" parent="Lisiere"]
+position = Vector2(1192, 296)
+
+[node name="Visuel" type="ColorRect" parent="Lisiere/ListeDePrimes"]
+offset_left = -4.0
+offset_top = -6.0
+offset_right = 4.0
+mouse_filter = 2
+color = Color(0.9372549, 0.89411765, 0.78431374, 1)
+
+[node name="Interactif" type="Area2D" parent="Lisiere/ListeDePrimes"]
+collision_layer = 64
+collision_mask = 0
+monitoring = false
+script = ExtResource("12_interactif")
+verbe = "ramasser la liste de primes"
+priorite = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Lisiere/ListeDePrimes/Interactif"]
+position = Vector2(0, -3)
+shape = SubResource("CircleShape2D_baton")
+
+[node name="Dieu" type="Node2D" parent="."]
+
+[node name="Silhouette1" parent="Dieu" instance=ExtResource("20_silhouette")]
+position = Vector2(232, 240)
+
+[node name="Silhouette2" parent="Dieu" instance=ExtResource("20_silhouette")]
+position = Vector2(952, 72)
+
+[node name="Silhouette3" parent="Dieu" instance=ExtResource("20_silhouette")]
+position = Vector2(1262, 344)
+distance_disparition = 56.0
+visible_au_depart = false
 
 [node name="Passages" type="Node2D" parent="."]
 
@@ -416,6 +481,30 @@ position = Vector2(920, 302)
 [node name="CampVillageois3" type="Marker2D" parent="Marqueurs"]
 position = Vector2(776, 246)
 
+[node name="RepriseLisiere" type="Marker2D" parent="Marqueurs"]
+position = Vector2(1008, 296)
+
+[node name="GarinEntree" type="Marker2D" parent="Marqueurs"]
+position = Vector2(1196, 296)
+
+[node name="GarinCombat" type="Marker2D" parent="Marqueurs"]
+position = Vector2(1136, 296)
+
+[node name="GarinDepart" type="Marker2D" parent="Marqueurs"]
+position = Vector2(1240, 296)
+
+[node name="Renfort1" type="Marker2D" parent="Marqueurs"]
+position = Vector2(1000, 256)
+
+[node name="Renfort2" type="Marker2D" parent="Marqueurs"]
+position = Vector2(1000, 296)
+
+[node name="Renfort3" type="Marker2D" parent="Marqueurs"]
+position = Vector2(1000, 336)
+
+[node name="Renfort4" type="Marker2D" parent="Marqueurs"]
+position = Vector2(1024, 276)
+
 [node name="Interface" type="CanvasLayer" parent="."]
 
 [node name="Coeurs" type="Control" parent="Interface" node_paths=PackedStringArray("gojo")]
@@ -494,5 +583,71 @@ theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
 script = ExtResource("16_invite")
 gojo = NodePath("../../Gojo")
+
+[node name="BarreBoss" type="Control" parent="Interface" node_paths=PackedStringArray("garin")]
+layout_mode = 3
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -70.0
+offset_top = 4.0
+offset_right = 70.0
+offset_bottom = 20.0
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("21_barre_boss")
+garin = NodePath("../../Lisiere/Garin")
+
+[node name="Nom" type="Label" parent="Interface/BarreBoss"]
+layout_mode = 0
+offset_top = -2.0
+offset_right = 140.0
+offset_bottom = 11.0
+theme_override_colors/font_color = Color(0.9373, 0.8941, 0.7843, 1)
+theme_override_font_sizes/font_size = 10
+text = "Garin Corbe"
+horizontal_alignment = 1
+
+[node name="Fin" type="Control" parent="Interface"]
+visible = false
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -110.0
+offset_top = -44.0
+offset_right = 110.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Fond" type="ColorRect" parent="Interface/Fin"]
+layout_mode = 0
+offset_right = 220.0
+offset_bottom = 48.0
+mouse_filter = 2
+color = Color(0.0784, 0.0667, 0.0549, 0.85)
+
+[node name="Titre" type="Label" parent="Interface/Fin"]
+layout_mode = 0
+offset_top = 6.0
+offset_right = 220.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(0.9490, 0.7569, 0.3059, 1)
+theme_override_font_sizes/font_size = 16
+text = "Fin de la tranche"
+horizontal_alignment = 1
+
+[node name="SousTitre" type="Label" parent="Interface/Fin"]
+layout_mode = 0
+offset_top = 28.0
+offset_right = 220.0
+offset_bottom = 41.0
+theme_override_colors/font_color = Color(0.9373, 0.8941, 0.7843, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
 
 [node name="InterfaceCarnet" parent="Interface" instance=ExtResource("17_carnet")]

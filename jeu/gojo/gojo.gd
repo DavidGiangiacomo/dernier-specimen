@@ -189,13 +189,15 @@ func revivre(point_de_reprise: Vector2) -> void:
 	soigner()
 
 
-## Le plus proche de ce avec quoi Gojo peut agir, ou null.
+## Ce avec quoi Gojo peut agir : le plus prioritaire, puis le plus proche ; ou null.
 func _interactif_proche() -> Interactif:
 	var meilleur: Interactif = null
 	for zone in _zone_interaction.get_overlapping_areas():
 		var interactif := zone as Interactif
 		if interactif and interactif.actif:
-			if meilleur == null or global_position.distance_squared_to(interactif.global_position) < global_position.distance_squared_to(meilleur.global_position):
+			if meilleur == null or interactif.priorite > meilleur.priorite:
+				meilleur = interactif
+			elif interactif.priorite == meilleur.priorite and global_position.distance_squared_to(interactif.global_position) < global_position.distance_squared_to(meilleur.global_position):
 				meilleur = interactif
 	return meilleur
 
