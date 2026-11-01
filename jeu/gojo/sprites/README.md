@@ -1,31 +1,45 @@
 # Les sprites de Gojo
 
-## `gojo_face.png` — la vue de face, à corriger
+## `gojo_face.png` — la vue de face
 
-Canevas 32 × 32, contenu 18 × 22, **12 couleurs, toutes dans la palette du
+Canevas 32 × 32, contenu 18 × 22, **13 couleurs, toutes dans la palette du
 jeu**. Le canevas fait 32 et non 24 parce que c'est le format que PixelLab
 impose pour faire pivoter un sprite en 8 directions ; le contenu, lui, tient
-dans les 24 × 24 du GDD.
+dans les 24 × 24 du GDD, pieds en bas.
 
-**Ce fichier n'est pas de l'art définitif.** C'est une base dessinée au
-pixel près pour remplacer une première génération IA inutilisable, dont le
-manteau crème ne représentait que 7 pixels sur 240.
+Dessiné au pixel près, pour remplacer une première génération IA inutilisable
+dont le manteau ne représentait que 7 pixels sur 240.
+
+### Le personnage
+
+| Élément | Couleurs | Rôle |
+| --- | --- | --- |
+| Manteau | `#333a4d`, ombre `#1b1f2d`, col `#5a6375` | La masse : 92 px sur ~240 |
+| Chemise | `#e8d5b0` | Visible dans l'ouverture du manteau |
+| Harnais du sac | `#6e5236` | Bretelles sur la poitrine, bords du sac aux épaules |
+| Cheveux | `#241c1a`, reflet `#3a2f2b` | Servent aussi de contour à la tête |
+| Gant d'analyse | `#8fe3ff`, éclat `#d8f6ff`, creux `#3a9fc9` | Au bout du bras gauche |
+
+Le manteau sombre n'est pas `#1b1f2d` malgré la consigne « gris très foncé » :
+cette couleur est trop proche du contour `#0d0f17`, le sprite redeviendrait une
+masse noire sur fond de forêt sombre. `#333a4d` avec `#1b1f2d` en ombre donne la
+même lecture tout en gardant du relief. Bénéfice secondaire du manteau sombre :
+le cyan du gant y ressort bien mieux que sur le crème d'origine.
 
 ### Ce qui est acquis
 
-- La silhouette passe le test du GDD : un seul composant, aucun trou,
-  reconnaissable en noir.
-- Le manteau crème est la masse dominante : 122 pixels sur ~240.
-- Le gant cyan `#8fe3ff` est rattaché au bras et déborde de la silhouette.
+- Silhouette : un seul composant, aucun trou, profil épaules 16 → taille 10 →
+  ourlet 18. Reconnaissable en noir, comme l'exige le GDD.
+- Le manteau est la masse dominante.
 - Zéro couleur hors palette.
 
 ### Ce qui reste à corriger, à l'œil
 
-- La forme se lit encore comme **une robe pâle** plutôt que comme un long
-  manteau de savant. L'ourlet s'évase trop régulièrement.
-- Il n'y a **pas de taille** : le corps est un triangle du col à l'ourlet.
-- Le **sac à dos est absent**, alors qu'il fait partie du personnage.
-- Le gant ne fait que 4 pixels : visible, mais discret.
+- Les débords du sac aux épaules se lisent comme **deux blocs bruns carrés**,
+  plutôt que comme une besace portée dans le dos.
+- Le passage épaules → taille est **abrupt** : le personnage paraît pincé au
+  milieu plutôt que cintré.
+- L'ourlet reste assez régulier pour du tissu lourd.
 
 ## Comment le corriger
 
