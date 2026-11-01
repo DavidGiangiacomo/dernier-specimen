@@ -1,0 +1,42 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://creatures/garin/piege.gd" id="1_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_piege"]
+size = Vector2(10, 6)
+
+[node name="Piege" type="Area2D" groups=["projectiles_de_garin", "pieges_de_garin"]]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("1_script")
+force_recul = 60.0
+
+[node name="Machoires" type="Node2D" parent="."]
+
+[node name="Gauche" type="ColorRect" parent="Machoires"]
+offset_left = -6.0
+offset_top = -3.0
+offset_right = -1.0
+offset_bottom = 3.0
+mouse_filter = 2
+color = Color(0.29803923, 0.29411766, 0.28627452, 1)
+
+[node name="Droite" type="ColorRect" parent="Machoires"]
+offset_left = 1.0
+offset_top = -3.0
+offset_right = 6.0
+offset_bottom = 3.0
+mouse_filter = 2
+color = Color(0.29803923, 0.29411766, 0.28627452, 1)
+
+[node name="Ressort" type="ColorRect" parent="Machoires"]
+offset_left = -1.0
+offset_top = -1.0
+offset_right = 1.0
+offset_bottom = 1.0
+mouse_filter = 2
+color = Color(0.6039216, 0.5254902, 0.3647059, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_piege")

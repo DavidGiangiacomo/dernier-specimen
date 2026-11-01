@@ -1,6 +1,7 @@
 extends "res://tests/base_de_test.gd"
-## Tests du jalon 4 : la quête du Bois des Souches jouée de bout en bout, puis les rase-mousses
-## et l'analyse d'une plante dans la main.
+## Tests des jalons 4 et 5 : la quête du Bois des Souches jouée de bout en bout, jusqu'à Garin
+## Corbe et la fin du carnet ; puis Garin affronté sans avoir soigné le camp, les rase-mousses,
+## l'analyse d'une plante dans la main, et la silhouette du Dieu des monstres.
 ##
 ## Les positions sont prises sur les nœuds de la zone (Greg, les malades, les plantes…) :
 ## on peut déplacer un personnage dans la scène sans casser les tests.
@@ -33,13 +34,28 @@ func nouvelle_zone() -> void:
 		rm.distance_detection = 0.0
 	await attendre(3)
 
+## Attend qu'un dialogue s'ouvre (par exemple après une marche), sans compter sur la vitesse de la machine.
+func attendre_dialogue(images_max := 300) -> void:
+	var images := 0
+	while not dialogue.en_cours and images < images_max:
+		await physics_frame
+		images += 1
+
+## Un coup de bâton dans Garin, de face.
+func frapper_garin() -> void:
+	await placer(zone.garin.global_position + Vector2(-16, 0), Vector2.RIGHT)
+	await appuyer("attaque")
+	await attendre(3)
+
 func lancer() -> void:
 	carnet = root.get_node("Carnet")
 	dialogue = root.get_node("Dialogue")
 	await test_quete_complete()
 	await test_greg_se_retourne()
+	await test_boss_sans_le_camp()
 	await test_rase_mousses()
 	await test_plante_dans_la_main()
+	await test_silhouettes()
 
 func test_quete_complete() -> void:
 	await nouvelle_zone()
@@ -112,7 +128,7 @@ func test_quete_complete() -> void:
 	verifier("sens unique : les ronces se referment derrière", zone.get_node("Passages/RoncesCamp").visible)
 	verifier("la meute du fourré est maintenant au camp", zone._embusques.all(func(g): return g.visible))
 	var lisiere_fermee: bool = zone.get_node("Passages/RoncesLisiere").visible
-	verifier("la lisière reste fermée (jalon 5)", lisiere_fermee)
+	verifier("avant la quête, la lisière est fermée", lisiere_fermee)
 
 	await placer(zone.lila.global_position + Vector2(-22, 2), Vector2.RIGHT)
 	await appuyer("interagir")
@@ -124,6 +140,7 @@ func test_quete_complete() -> void:
 	lues = await lire_dialogue()
 	verifier("analyser un malade ouvre la quête", zone.etape == zone.Etape.QUETE and lues == 2, "%d lignes" % lues)
 	verifier("première observation des gobelins", carnet.analyses(malade.analysable.espece) == 1)
+	verifier("la quête ouvre la lisière", not zone.get_node("Passages/RoncesLisiere").visible)
 
 	section("Beat 4 : la cueillette")
 	var mousse: Node2D = zone.get_node("Chene/MousseDeLune")
@@ -202,6 +219,154 @@ func test_quete_complete() -> void:
 	await attendre(100)
 	verifier("il repart du camp, avec tous ses PV et sa plante", gojo.etat == gojo.Etat.MARCHE and gojo.pv == 6 and gojo.global_position.distance_to(zone._marqueur("RepriseCamp")) < 1.0 and gojo.sacoche.plantes.size() == 1, "etat %d, pv %d, %s, %d plante(s)" % [gojo.etat, gojo.pv, gojo.global_position, gojo.sacoche.plantes.size()])
 
+	await test_boss_avec_le_camp()
+
+## La suite de la quête : le camp est soigné, et Gojo a encore la fleur-trompette.
+func test_boss_avec_le_camp() -> void:
+	var garin = zone.garin
+	var espece = garin.analysable.espece
+	var ronces: Node2D = zone.get_node("Passages/RoncesLisiere")
+	var invite: Label = zone.get_node("Interface/Invite")
+	section("Beat 6 : la lisière")
+	verifier("Garin n'est pas encore là", not garin.visible)
+	await placer(zone.get_node("Lisiere/AvantLisiere").global_position + Vector2(0, 8))
+	var lues := await lire_dialogue()
+	verifier("au seuil de la lisière, une odeur de fumée (2 lignes)", lues == 2, "%d ligne(s)" % lues)
+	await placer(zone.get_node("Lisiere/EntreeLisiere").global_position + Vector2(4, 8), Vector2.RIGHT)
+	verifier("sens unique : les ronces se referment derrière", ronces.visible and zone.etape == zone.Etape.BOSS)
+	verifier("Garin entre dans la lisière", garin.visible)
+	await attendre_dialogue()
+	lues = await lire_dialogue()
+	verifier("il se présente (3 lignes)", lues == 3, "%d ligne(s)" % lues)
+	verifier("le combat commence : sa barre de vie s'affiche", zone.get_node("Interface/BarreBoss").visible and garin.etat == garin.Etat.MARCHE and garin.phase == 1)
+
+	section("Phase 1 : l'arbalète")
+	await placer(garin.global_position + Vector2(-110, 0), Vector2.RIGHT)
+	var pv_avant: int = gojo.pv
+	var a_vise := false
+	for i in 240:
+		await attendre(1)
+		a_vise = a_vise or (garin.etat == garin.Etat.VISEE and garin.get_node("Arme/Visee").visible)
+		if gojo.pv < pv_avant:
+			break
+	verifier("il vise : un trait rouge", a_vise)
+	verifier("le carreau touche Gojo : 1 PV", gojo.pv == pv_avant - 1, "pv %d" % gojo.pv)
+	await attendre(60)
+	pv_avant = gojo.pv
+	var images := 0
+	while garin.etat != garin.Etat.VISEE and images < 240:
+		await attendre(1)
+		images += 1
+	while garin.etat == garin.Etat.VISEE:
+		await attendre(1)
+	var carreaux := get_nodes_in_group("projectiles_de_garin")
+	var carreau: Node2D = carreaux[0] if not carreaux.is_empty() else null
+	while is_instance_valid(carreau) and carreau.global_position.distance_to(gojo.global_position + Vector2(0, -11)) > 30.0:
+		await attendre(1)
+	await appuyer("roulade")
+	await attendre(20)
+	verifier("une roulade traverse le carreau sans dommage", carreau != null and gojo.pv == pv_avant, "pv %d" % gojo.pv)
+
+	section("Les pièges")
+	garin._temps_avant_tir = 99.0
+	await placer(garin.global_position + Vector2(-40, 0), Vector2.RIGHT)
+	var piege: Node2D = null
+	for i in 240:
+		await attendre(1)
+		var pieges := get_nodes_in_group("pieges_de_garin")
+		if not pieges.is_empty():
+			piege = pieges[0]
+			break
+	verifier("serré de près, il pose un piège", piege != null)
+	garin._temps_avant_piege = 99.0
+	if piege:
+		pv_avant = gojo.pv
+		await placer(piege.global_position + Vector2(0, 8))
+		verifier("marcher dessus : 1 PV", gojo.pv == pv_avant - 1, "pv %d" % gojo.pv)
+		await attendre(40)
+		verifier("un piège ne sert qu'une fois", not is_instance_valid(piege))
+
+	section("Le pollen et la page de Garin")
+	gojo.soigner()
+	await placer(garin.global_position + Vector2(-18, 2), Vector2.RIGHT)
+	verifier("avec la fleur-trompette : « E : souffler le pollen »", invite.text == "E : souffler le pollen", invite.text)
+	await appuyer("interagir")
+	verifier("le pollen endort Garin", garin.etat == garin.Etat.ENDORMI)
+	await analyser()
+	await analyser()
+	verifier("endormi, il s'analyse : deux observations", carnet.analyses(espece) == 2, "%d" % carnet.analyses(espece))
+	while garin.etat == garin.Etat.ENDORMI:
+		await attendre(1)
+	verifier("réveillé, le pollen ne marche plus tout de suite", not garin.peut_etre_endormi() and not invite.text.contains("pollen"))
+	garin._temps_resistance = 0.0
+	await placer(garin.global_position + Vector2(-18, 2), Vector2.RIGHT)
+	await appuyer("interagir")
+	var pv_garin: int = garin.pv
+	await frapper_garin()
+	verifier("un coup de bâton le réveille", garin.etat != garin.Etat.ENDORMI and garin.pv == pv_garin - 1)
+	garin._temps_resistance = 0.0
+	await placer(garin.global_position + Vector2(-18, 2), Vector2.RIGHT)
+	await appuyer("interagir")
+	await analyser()
+	verifier("troisième analyse : sa page est complète", carnet.est_complete(espece))
+
+	section("Phase 2 : la lame, et le renfort")
+	await attendre(20)
+	garin.pv = garin.pv_max / 2 + 1
+	await frapper_garin()
+	lues = await lire_dialogue()
+	verifier("à mi-vie, il jette l'arbalète et sort la lame (1 + 1 lignes)", garin.phase == 2 and lues == 2, "phase %d, %d ligne(s)" % [garin.phase, lues])
+	verifier("l'arbalète reste dans l'herbe", garin.get_node_or_null("Arme/Arbalete") == null)
+	var renfort: Array = zone._renfort
+	verifier("le camp soigné, quatre gobelins viennent en renfort", renfort.size() == 4 and renfort.all(func(g): return g.visible and g.etat == g.Etat.ATTAQUE and g.cible_attaque == garin and g.global_position.x > 976))
+	await placer(zone._marqueur("RepriseLisiere"))
+	pv_garin = garin.pv
+	var diversion := false
+	for i in 300:
+		await attendre(1)
+		diversion = diversion or (garin._cible() != gojo and garin._cible() in renfort)
+		if diversion:
+			break
+	verifier("frappé par un gobelin, Garin se retourne contre lui", diversion)
+	verifier("les gobelins ne lui font presque rien", garin.pv == pv_garin, "pv %d" % garin.pv)
+	await frapper_garin()
+	verifier("pendant la diversion, les coups de Gojo portent toujours", garin.pv == pv_garin - 1, "pv %d" % garin.pv)
+
+	section("La fin du carnet")
+	gojo.soigner()
+	await attendre(20)
+	garin.pv = 1
+	await frapper_garin()
+	lues = await lire_dialogue()
+	verifier("à 0 PV, Garin tombe à genoux (1 ligne) : il ne meurt pas", garin.etat == garin.Etat.A_TERRE and garin.visible and lues == 1, "%d ligne(s)" % lues)
+	verifier("la barre de vie disparaît, le renfort s'arrête", not zone.get_node("Interface/BarreBoss").visible and renfort.all(func(g): return g.etat == g.Etat.IMMOBILE))
+	# Le dialogue a figé Gojo au milieu de son coup de bâton : on le laisse finir.
+	await attendre(10)
+	await placer(garin.global_position + Vector2(-18, 2), Vector2.RIGHT)
+	verifier("page complète : « E : tendre le carnet »", invite.text == "E : tendre le carnet", invite.text)
+	await appuyer("interagir")
+	lues = await lire_dialogue()
+	verifier("Garin lit (3 lignes) : sa page passe en langage humain", lues == 3 and carnet.est_apaisee(espece), "%d ligne(s)" % lues)
+	verifier("il laisse tomber sa torche", garin.get_node_or_null("Torche") == null)
+	images = 0
+	while garin.visible and images < 300:
+		await attendre(1)
+		images += 1
+	verifier("il s'en va", not garin.visible)
+	var liste: Node2D = zone.get_node("Lisiere/ListeDePrimes")
+	verifier("il laisse derrière lui sa liste de primes", liste.visible)
+	await placer(liste.global_position + Vector2(-14, 0), Vector2.RIGHT)
+	verifier("« E : ramasser la liste de primes »", invite.text == "E : ramasser la liste de primes", invite.text)
+	await appuyer("interagir")
+	lues = await lire_dialogue()
+	verifier("la liste de primes (3 lignes), et c'est la fin", lues == 3 and zone.etape == zone.Etape.FIN and zone.fin_heureuse, "%d ligne(s)" % lues)
+	var fin: Control = zone.get_node("Interface/Fin")
+	verifier("l'écran de fin provisoire", fin.visible and fin.get_node("SousTitre").text == zone.texte_fin_du_carnet)
+	verifier("la lisière se rouvre", not ronces.visible)
+	verifier("le renfort rentre au camp", zone._renfort.is_empty() and zone.greg.global_position.distance_to(zone._marqueur("CampGreg")) < 1.0 and zone.greg.get_node("Hitbox").collision_layer == 16)
+	verifier("le Dieu des monstres regarde, à l'orée du bois", zone.get_node("Dieu/Silhouette3").visible)
+	verifier("au camp, Lila sait que l'homme au feu est parti", zone.lila.repliques == zone.repliques_lila_apres_garin)
+
 func test_greg_se_retourne() -> void:
 	await nouvelle_zone()
 	section("Variante : Gojo s'approche de Greg sans frapper")
@@ -215,6 +380,70 @@ func test_greg_se_retourne() -> void:
 		temps += 1.0 / 60.0
 	verifier("sans se défendre non plus, moins de quinze secondes", temps < 15.0 and gojo.pv == 1, "%.1f s" % temps)
 	await lire_dialogue()
+
+func test_boss_sans_le_camp() -> void:
+	await nouvelle_zone()
+	section("Variante : affronter Garin sans avoir soigné le camp")
+	var garin = zone.garin
+	var ronces: Node2D = zone.get_node("Passages/RoncesLisiere")
+	gojo.a_le_baton = true
+	zone.etape = zone.Etape.CAMP
+	var malade: Node2D = zone.get_node("Camp/Malades/Malade1")
+	await placer(malade.global_position + Vector2(-22, 2), Vector2.RIGHT)
+	await analyser()
+	await lire_dialogue()
+	verifier("dès la quête, la lisière est ouverte", zone.etape == zone.Etape.QUETE and not ronces.visible)
+	await placer(zone.get_node("Lisiere/EntreeLisiere").global_position + Vector2(4, 8), Vector2.RIGHT)
+	await attendre_dialogue()
+	var lues := await lire_dialogue()
+	verifier("Garin arrive (3 lignes)", lues == 3 and garin.etat == garin.Etat.MARCHE)
+
+	section("K.O. pendant le combat")
+	await frapper_garin()
+	verifier("un coup de bâton : 1 PV", garin.pv == garin.pv_max - 1, "pv %d" % garin.pv)
+	gojo.pv = 1
+	var coup := creer_coup(zone, gojo.global_position + Vector2(0, -10))
+	await attendre(5)
+	coup.queue_free()
+	verifier("Gojo tombe K.O.", gojo.etat == gojo.Etat.KO)
+	await attendre(100)
+	verifier("il repart de l'entrée de la lisière", gojo.etat == gojo.Etat.MARCHE and gojo.pv == 6 and gojo.global_position.distance_to(zone._marqueur("RepriseLisiere")) < 1.0)
+	verifier("le combat recommence : Garin a tous ses PV", zone.etape == zone.Etape.BOSS and garin.pv == garin.pv_max and garin.phase == 1 and garin.etat == garin.Etat.MARCHE)
+
+	section("Phase 2, sans renfort")
+	await attendre(20)
+	garin.pv = garin.pv_max / 2 + 1
+	await frapper_garin()
+	lues = await lire_dialogue()
+	verifier("il sort la lame, et personne ne vient (1 ligne)", garin.phase == 2 and lues == 1 and zone._renfort.is_empty() and zone.greg.global_position.x < 960, "%d ligne(s)" % lues)
+	gojo.soigner()
+	var pv_avant: int = gojo.pv
+	var a_leve_la_lame := false
+	var a_souffle := false
+	await placer(garin.global_position + Vector2(-30, 0), Vector2.RIGHT)
+	for i in 180:
+		await attendre(1)
+		a_leve_la_lame = a_leve_la_lame or (garin.etat == garin.Etat.LAME_LEVEE and gojo.pv == pv_avant)
+		a_souffle = a_souffle or garin.etat == garin.Etat.SOUFFLE
+		if gojo.pv < pv_avant and a_souffle:
+			break
+	verifier("il lève la lame, puis frappe : 1 PV", a_leve_la_lame and gojo.pv == pv_avant - 1, "pv %d" % gojo.pv)
+	verifier("après le coup, il souffle", a_souffle)
+
+	section("La fin ouverte")
+	await attendre(60)
+	garin.pv = 1
+	await frapper_garin()
+	lues = await lire_dialogue()
+	verifier("page incomplète : à genoux, il jure de revenir (1 + 2 lignes)", lues == 3, "%d ligne(s)" % lues)
+	var images := 0
+	while garin.visible and images < 300:
+		await attendre(1)
+		images += 1
+	verifier("il s'enfuit entre les arbres", not garin.visible)
+	verifier("c'est la fin ouverte", zone.etape == zone.Etape.FIN and not zone.fin_heureuse and zone.get_node("Interface/Fin/SousTitre").text == zone.texte_fin_ouverte)
+	verifier("sa page reste en langage de laboratoire, sans liste de primes", not carnet.est_apaisee(garin.analysable.espece) and not zone.get_node("Lisiere/ListeDePrimes").visible)
+	verifier("la lisière se rouvre : le camp reste à soigner", not ronces.visible and zone._malades.any(func(m): return m.est_malade()))
 
 func rase_mousses() -> Array:
 	return zone.get_node("Creux").get_children().filter(func(n): return n.name.begins_with("RaseMousse"))
@@ -343,3 +572,19 @@ func test_plante_dans_la_main() -> void:
 	verifier("un coup reçu interrompt aussi l'examen", gojo.etat != gojo.Etat.ANALYSE and gojo._progression_analyse == 0.0)
 	Input.action_release("analyse")
 	await attendre(2)
+
+func test_silhouettes() -> void:
+	await nouvelle_zone()
+	section("Le Dieu des monstres, en lisière de forêt")
+	var premiere: Node2D = zone.get_node("Dieu/Silhouette1")
+	var deuxieme: Node2D = zone.get_node("Dieu/Silhouette2")
+	var derniere: Node2D = zone.get_node("Dieu/Silhouette3")
+	verifier("aperçu dans la clairière, dès l'arrivée", premiere.visible and premiere.global_position.distance_to(gojo.global_position) > premiere.distance_disparition)
+	verifier("une autre au vieux chêne ; la dernière attend la fin", deuxieme.visible and not derniere.visible)
+	verifier("muet : rien à lui dire, rien à analyser", premiere.find_children("*", "Area2D").is_empty())
+	await placer(premiere.global_position + Vector2(0, 60))
+	await attendre(45)
+	verifier("Gojo s'approche : il s'efface", not premiere.visible and premiere.est_effacee())
+	await placer(premiere.global_position + Vector2(-120, 60))
+	await attendre(30)
+	verifier("il ne revient pas, les autres restent", not premiere.visible and deuxieme.visible)

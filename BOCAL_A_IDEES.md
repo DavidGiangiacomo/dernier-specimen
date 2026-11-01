@@ -54,8 +54,8 @@ Ce serait bien d'avoir un inventaire et des armes différentes.
 
 Un système de réputation, qui baisserait quand on attaque les gobelins du village. En v1, on ne peut pas les attaquer.
 
-### 2026-10-28 — La voix du dieu des bêtes
+### 2026-10-28 — La voix du Dieu des monstres
 
 **Qui** : Alessio
 
-Avoir la voix du dieu des bêtes qui te parle, t'aide ou te juge, pendant le tutoriel (ou après ?).
+Avoir la voix du Dieu des monstres qui te parle, t'aide ou te juge, pendant le tutoriel (ou après ?).
