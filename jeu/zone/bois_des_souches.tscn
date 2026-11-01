@@ -21,6 +21,8 @@
 [ext_resource type="PackedScene" path="res://creatures/garin/garin.tscn" id="19_garin"]
 [ext_resource type="PackedScene" path="res://dieu/silhouette.tscn" id="20_silhouette"]
 [ext_resource type="Script" path="res://interface/barre_boss.gd" id="21_barre_boss"]
+[ext_resource type="Texture2D" path="res://zone/sprites/baton.png" id="22_baton"]
+[ext_resource type="Texture2D" path="res://zone/sprites/ronces.png" id="23_ronces"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ronces"]
 size = Vector2(16, 32)
@@ -50,7 +52,14 @@ y_sort_enabled = true
 [node name="BatonAuSol" type="Node2D" parent="Clairiere"]
 position = Vector2(184, 300)
 
+[node name="Dessin" type="Sprite2D" parent="Clairiere/BatonAuSol"]
+texture_filter = 1
+centered = false
+offset = Vector2(-8, -16)
+texture = ExtResource("22_baton")
+
 [node name="Visuel" type="ColorRect" parent="Clairiere/BatonAuSol"]
+visible = false
 offset_left = -7.0
 offset_top = -3.0
 offset_right = 7.0
@@ -279,7 +288,14 @@ visible_au_depart = false
 position = Vector2(328, 288)
 collision_mask = 0
 
+[node name="Dessin" type="Sprite2D" parent="Passages/RoncesFourre"]
+texture_filter = 1
+centered = false
+offset = Vector2(-8, -16)
+texture = ExtResource("23_ronces")
+
 [node name="Visuel" type="ColorRect" parent="Passages/RoncesFourre"]
+visible = false
 offset_left = -8.0
 offset_top = -16.0
 offset_right = 8.0
@@ -339,7 +355,14 @@ shape = SubResource("RectangleShape2D_ronces")
 position = Vector2(648, 288)
 collision_mask = 0
 
+[node name="Dessin" type="Sprite2D" parent="Passages/RoncesCamp"]
+texture_filter = 1
+centered = false
+offset = Vector2(-8, -16)
+texture = ExtResource("23_ronces")
+
 [node name="Visuel" type="ColorRect" parent="Passages/RoncesCamp"]
+visible = false
 offset_left = -8.0
 offset_top = -16.0
 offset_right = 8.0
@@ -399,7 +422,14 @@ shape = SubResource("RectangleShape2D_ronces")
 position = Vector2(968, 288)
 collision_mask = 0
 
+[node name="Dessin" type="Sprite2D" parent="Passages/RoncesLisiere"]
+texture_filter = 1
+centered = false
+offset = Vector2(-8, -16)
+texture = ExtResource("23_ronces")
+
 [node name="Visuel" type="ColorRect" parent="Passages/RoncesLisiere"]
+visible = false
 offset_left = -8.0
 offset_top = -16.0
 offset_right = 8.0

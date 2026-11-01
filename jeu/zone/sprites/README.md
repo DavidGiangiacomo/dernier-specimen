@@ -1,5 +1,24 @@
 # Les sprites de la zone
 
+| Fichier | Taille | Ce que c'est |
+| --- | --- | --- |
+| `dieu_des_monstres.png` | 24 × 48 | la silhouette en lisière |
+| `souche.png` | 16 × 16 | une souche, il y en a cinq — la hure s'y assomme |
+| `baton.png` | 16 × 16 | le bâton ferré, au sol dans la clairière |
+| `ronces.png` | 16 × 32 | les ronces qui ferment les passages |
+
+Chacun remplace un rectangle provisoire **de la même taille**, et les pieds
+tombent au même endroit. Les rectangles ne sont pas supprimés mais masqués :
+la forme d'origine reste lisible dans la scène.
+
+Les ronces font 32 px de haut et non 16 : leur rectangle allait de −16 à +16,
+elles débordent de part et d'autre du passage qu'elles ferment. Elles sont
+dessinées en brins qui se croisent plutôt qu'en mur plein — un premier essai
+en rectangle rempli se lisait comme un bloc rouge, pas comme un enchevêtrement.
+
+`RoncesFourre` est masqué au démarrage : ce premier passage est ouvert dès le
+début. Les deux autres sont visibles.
+
 ## `dieu_des_monstres.png`
 
 Canevas **24 × 48**, contenu 20 × 43, pieds à y = 46. Une seule image, comme

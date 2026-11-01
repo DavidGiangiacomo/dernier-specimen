@@ -70,3 +70,9 @@ le chapeau, qui le désigne ; la ceinture rouge ; et le carnet à sa ceinture.
 Le tremblement d'avertissement avant un coup de lame est reporté sur le
 dessin, comme il l'était sur le rectangle. La torche reste un nœud à part :
 il la lâche à la fin, et `lacher_torche()` la dépose au sol.
+
+## `piege.png` — le piège qu'il pose
+
+16 × 16, contenu 12 × 6, centré sur son nœud comme l'étaient les trois
+rectangles qu'il remplace : deux mâchoires d'acier `#5a6375` et un ressort
+`#b5812a` au milieu.
