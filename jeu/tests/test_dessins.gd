@@ -27,6 +27,7 @@ func lancer() -> void:
 		await un_personnage(p["scene"], p["nom"])
 	for e in ETATS:
 		await un_etat(e["scene"], e["nom"], e["etat"])
+	await les_plantes()
 	await teinte_selon_l_etat()
 	await ancrage_de_gojo()
 	await couleurs_d_etat()
@@ -206,3 +207,55 @@ func teinte_selon_l_etat() -> void:
 			dessin.modulate.r >= 2.0, str(dessin.modulate))
 		scene.queue_free()
 		await attendre(2)
+
+
+## Les plantes changent de dessin une fois analysées — « une fois son espèce
+## dans l'herbier, Gojo voit la différence ». Et surtout : avant analyse, la
+## mousse-de-lune et la ronce-rouge doivent être INDISCERNABLES. C'est l'énigme
+## des malades : l'une soigne, l'autre empoisonne, et rien ne les distingue
+## tant qu'on n'a pas pris le temps d'analyser.
+func les_plantes() -> void:
+	section("Les plantes : avant et après l'herbier")
+	root.get_node("Carnet").effacer()
+	var scene_plante := load("res://plantes/plante.tscn")
+	var avant := {}
+	var apres := {}
+	for nom in ["mousse_de_lune", "ronce_rouge", "capuchon_gris", "fleur_trompette"]:
+		var plante: Node2D = scene_plante.instantiate()
+		plante.espece = load("res://plantes/%s.tres" % nom)
+		root.add_child(plante)
+		await attendre(2)
+		var dessin: Sprite2D = plante.get_node_or_null("Dessin")
+		if dessin == null or not dessin.visible:
+			verifier("%s : le dessin est là" % nom, false)
+			plante.queue_free()
+			continue
+		var visuel: ColorRect = plante.get_node("Visuel")
+		verifier("%s : le rectangle provisoire est masqué" % nom, not visuel.visible)
+		# On garde les PIXELS, pas le chemin : ce qui compte est ce que le
+		# joueur voit. Deux fichiers distincts au contenu identique sont
+		# indiscernables pour lui, et c'est tout ce qui est demandé.
+		avant[nom] = dessin.texture.get_image().get_data()
+		verifier("%s : avant analyse, le dessin apparent" % nom,
+			dessin.texture.resource_path.ends_with("_apparent.png"),
+			dessin.texture.resource_path.get_file())
+
+		# On remplit sa page : une seule analyse suffit pour une plante.
+		var carnet = root.get_node("Carnet")
+		for i in 5:
+			if carnet.est_complete(plante.espece):
+				break
+			carnet.ajouter_analyse(plante.espece)
+		await attendre(2)
+		apres[nom] = dessin.texture.get_image().get_data()
+		verifier("%s : une fois connue, le dessin change" % nom,
+			apres[nom] != avant[nom] and not dessin.texture.resource_path.ends_with("_apparent.png"),
+			dessin.texture.resource_path.get_file())
+		plante.queue_free()
+		await attendre(2)
+		carnet.effacer()
+
+	verifier("mousse-de-lune et ronce-rouge : mêmes pixels avant analyse",
+		avant.has("mousse_de_lune") and avant["mousse_de_lune"] == avant.get("ronce_rouge"))
+	verifier("et des pixels différents une fois analysées",
+		apres.has("mousse_de_lune") and apres["mousse_de_lune"] != apres.get("ronce_rouge"))
