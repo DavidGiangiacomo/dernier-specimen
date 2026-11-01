@@ -51,6 +51,8 @@ var _temps_avant_attaque := 0.0
 var _gojo: Gojo
 
 @onready var _corps: ColorRect = $Corps
+## Le dessin, s'il est là. Sinon le rectangle provisoire continue de s'afficher.
+@onready var _dessin: SpriteDirectionnel = get_node_or_null("Dessin")
 @onready var _hurtbox: Hurtbox = $Hurtbox
 @onready var _hitbox: Hitbox = $Hitbox
 @onready var _interactif: Interactif = $Interactif
@@ -162,3 +164,8 @@ func _mettre_a_jour_apparence() -> void:
 	if _temps_eclat > MARGE_ARRONDI:
 		couleur = Color.WHITE
 	_corps.color = couleur
+	if _dessin:
+		# Ils voltigent sans jamais tenir en place : c'est leur vitesse qui dit
+		# où ils regardent. À l'arrêt, le dessin garde la dernière direction.
+		_dessin.teinter(couleur)
+		_dessin.regarder(velocity)
