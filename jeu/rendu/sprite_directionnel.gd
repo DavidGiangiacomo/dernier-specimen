@@ -25,6 +25,11 @@ const DIRECTIONS: Array[String] = [
 @export var couleur_de_reference := Color.WHITE
 ## Le rectangle provisoire, à masquer dès que les huit dessins sont là.
 @export var provisoire: NodePath
+## Les états qui ont leur propre jeu de huit dessins, nommés
+## <prefixe>_<etat>_<direction>.png — par exemple « apaisee » pour la hure
+## sans son épine, « a_terre » pour Garin à genoux. Un état dont il manque
+## une image est ignoré : on garde le jeu normal plutôt que d'afficher un trou.
+@export var etats: Array[String] = []
 
 ## Au-dessus de ce seuil sur les trois canaux, la couleur demandée est un éclat
 ## blanc, pas une teinte : on blanchit alors franchement tout le dessin.
@@ -33,22 +38,50 @@ const SEUIL_ECLAT := 0.98
 const FORCE_ECLAT := 6.0
 
 var _images := {}
+## Un jeu de huit images par état ; la chaîne vide est l'état normal.
+var _jeux := {}
+var _etat := ""
+var _derniere := "south"
 
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	for direction in DIRECTIONS:
-		var chemin := "%s/%s_%s.png" % [dossier, prefixe, direction]
-		if ResourceLoader.exists(chemin):
-			_images[direction] = load(chemin)
+	_images = _charger("")
 	if _images.size() < DIRECTIONS.size():
 		# Il manque des dessins : on laisse le rectangle provisoire travailler.
 		visible = false
 		return
+	_jeux[""] = _images
+	for nom in etats:
+		var jeu := _charger(nom)
+		if jeu.size() == DIRECTIONS.size():
+			_jeux[nom] = jeu
 	var rectangle := get_node_or_null(provisoire)
 	if rectangle:
 		rectangle.visible = false
 	regarder(Vector2.DOWN)
+
+
+## Charge les huit images d'un état. Nom vide : l'état normal.
+func _charger(nom: String) -> Dictionary:
+	var jeu := {}
+	var milieu := "" if nom == "" else nom + "_"
+	for direction in DIRECTIONS:
+		var chemin := "%s/%s_%s%s.png" % [dossier, prefixe, milieu, direction]
+		if ResourceLoader.exists(chemin):
+			jeu[direction] = load(chemin)
+	return jeu
+
+
+## Bascule sur le jeu de dessins d'un état, ou sur le jeu normal avec "".
+## Un état dont le jeu manque ne change rien : mieux vaut le mauvais dessin
+## que pas de dessin du tout.
+func etat(nom: String) -> void:
+	if not visible or nom == _etat or not _jeux.has(nom):
+		return
+	_etat = nom
+	_images = _jeux[nom]
+	texture = _images[_derniere]
 
 
 ## Montre l'image qui correspond à la direction. Une direction nulle ne change rien :
@@ -57,7 +90,8 @@ func regarder(direction: Vector2) -> void:
 	if not visible or direction.is_zero_approx():
 		return
 	var huitieme := posmod(roundi(direction.angle() / (TAU / 8.0)), 8)
-	texture = _images[DIRECTIONS[huitieme]]
+	_derniere = DIRECTIONS[huitieme]
+	texture = _images[_derniere]
 
 
 ## Reprend la couleur d'état que le script du personnage calcule déjà, et la
@@ -68,7 +102,13 @@ func teinter(couleur: Color) -> void:
 	if not visible:
 		return
 	var a := modulate.a
-	if couleur.r >= SEUIL_ECLAT and couleur.g >= SEUIL_ECLAT and couleur.b >= SEUIL_ECLAT:
+	if _etat != "" and not _est_un_eclat(couleur):
+		# L'état a son propre dessin : il dit déjà ce qu'il a à dire, et le
+		# teinter par-dessus ne ferait que délaver une image déjà juste.
+		# Seul l'éclat d'un coup reçu passe encore.
+		modulate = Color(1, 1, 1, a)
+		return
+	if _est_un_eclat(couleur):
 		# Un éclat blanc. Une teinte multiplicative laisserait les pixels sombres
 		# sombres, et le joueur ne verrait pas qu'il a été touché.
 		modulate = Color(FORCE_ECLAT, FORCE_ECLAT, FORCE_ECLAT)
@@ -80,3 +120,8 @@ func teinter(couleur: Color) -> void:
 		couleur.b / maxf(couleur_de_reference.b, 0.01),
 	)
 	modulate.a = a
+
+
+## Vrai si la couleur demandée est un éclat blanc, et non une teinte d'état.
+func _est_un_eclat(couleur: Color) -> bool:
+	return couleur.r >= SEUIL_ECLAT and couleur.g >= SEUIL_ECLAT and couleur.b >= SEUIL_ECLAT

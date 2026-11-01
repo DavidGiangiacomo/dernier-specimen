@@ -57,3 +57,16 @@ que ce qui existe**. Le dos a donc été dessiné à la main, comme la face.
 arrivée au jalon 5. À dessiner à part, pour pouvoir la lui faire lâcher à la
 fin 2 : *« Gojo lui tend le carnet ; Garin lit, se tait, lâche sa torche et
 s'en va. »*
+
+## `garin_a_terre_*.png` — à genoux
+
+Huit directions, **14 px de haut** au lieu de 22 — la hauteur que `garin.gd`
+donnait déjà au rectangle en `Etat.A_TERRE`. Cinq vues dessinées à la main,
+trois miroirs, zéro génération.
+
+C'est le moment où Gojo lui tend le carnet, donc ce qui devait rester lisible :
+le chapeau, qui le désigne ; la ceinture rouge ; et le carnet à sa ceinture.
+
+Le tremblement d'avertissement avant un coup de lame est reporté sur le
+dessin, comme il l'était sur le rectangle. La torche reste un nœud à part :
+il la lâche à la fin, et `lacher_torche()` la dépose au sol.

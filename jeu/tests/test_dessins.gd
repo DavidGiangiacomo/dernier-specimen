@@ -7,12 +7,22 @@ extends "res://tests/base_de_test.gd"
 const PERSONNAGES := [
 	{"scene": "res://gojo/gojo.tscn", "nom": "Gojo"},
 	{"scene": "res://creatures/rase_mousse/rase_mousse.tscn", "nom": "Rase-mousse"},
+	{"scene": "res://creatures/hure/hure.tscn", "nom": "Hure"},
+	{"scene": "res://creatures/garin/garin.tscn", "nom": "Garin"},
+]
+
+## Les états qui ont leur propre jeu de dessins, et comment les reconnaître.
+const ETATS := [
+	{"scene": "res://creatures/hure/hure.tscn", "nom": "Hure apaisée", "etat": "apaisee"},
+	{"scene": "res://creatures/garin/garin.tscn", "nom": "Garin à terre", "etat": "a_terre"},
 ]
 
 
 func lancer() -> void:
 	for p in PERSONNAGES:
 		await un_personnage(p["scene"], p["nom"])
+	for e in ETATS:
+		await un_etat(e["scene"], e["nom"], e["etat"])
 	await ancrage_de_gojo()
 	await couleurs_d_etat()
 
@@ -121,5 +131,44 @@ func couleurs_d_etat() -> void:
 	dessin.teinter(dessin.couleur_de_reference)
 	verifier("teinter ne perd pas l'opacité du clignotement",
 		is_equal_approx(dessin.modulate.a, 0.25), "%.2f" % dessin.modulate.a)
+	scene.queue_free()
+	await attendre(2)
+
+
+## Un état a son propre jeu de huit dessins : basculer dessus doit changer
+## l'image, et revenir doit la rendre.
+func un_etat(chemin: String, nom: String, nom_etat: String) -> void:
+	section(nom)
+	var paire := await _poser(chemin)
+	var scene: Node = paire[0]
+	var dessin = paire[1]
+	if dessin == null or not dessin.visible:
+		verifier("le dessin est là", false)
+		scene.queue_free()
+		return
+
+	dessin.regarder(Vector2.DOWN)
+	var normal: String = dessin.texture.resource_path
+	dessin.etat(nom_etat)
+	var special: String = dessin.texture.resource_path
+	verifier("l'état « %s » a son propre dessin" % nom_etat,
+		special != normal and special.contains("_%s_" % nom_etat), special.get_file())
+
+	# Changer de direction doit rester dans l'état.
+	dessin.regarder(Vector2.RIGHT)
+	verifier("on tourne sans quitter l'état",
+		dessin.texture.resource_path.contains("_%s_" % nom_etat),
+		dessin.texture.resource_path.get_file())
+
+	dessin.etat("")
+	dessin.regarder(Vector2.DOWN)
+	verifier("revenir à l'état normal rend le dessin normal",
+		dessin.texture.resource_path == normal, dessin.texture.resource_path.get_file())
+
+	# Un état qu'on n'a pas dessiné ne doit rien casser : mieux vaut le
+	# mauvais dessin que pas de dessin du tout.
+	dessin.etat("etat_qui_n_existe_pas")
+	verifier("un état sans dessins ne change rien",
+		dessin.texture.resource_path == normal, dessin.texture.resource_path.get_file())
 	scene.queue_free()
 	await attendre(2)

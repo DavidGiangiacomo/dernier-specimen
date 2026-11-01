@@ -67,3 +67,18 @@ qui se défera à l'animation.
 1. Ouvrir le fichier dans Pixelorama.
 2. Charger `jeu/palette/palette.gpl` et ne peindre qu'avec ces couleurs.
 3. Garder les pieds sur la ligne y = 27, et l'épine visible.
+
+## `hure_apaisee_*.png` — l'état apaisé
+
+Huit directions **sans l'épine**, dérivées automatiquement des huit autres :
+l'épine et sa plaie sont effacées, puis tout trou que cela laisserait dans le
+corps est rebouché avec la couleur dominante autour. En pratique l'épine était
+entièrement hors de la silhouette : aucun trou n'a eu à être comblé.
+
+C'est l'aboutissement de la clé de la créature. `hure.gd` bascule dessus en
+`Etat.APAISEE`, via `SpriteDirectionnel.etat("apaisee")`.
+
+**La teinte d'état ne s'applique pas** quand ce dessin est affiché. La couleur
+`couleur_apaisee` avait été réglée pour remplacer un rectangle ; appliquée en
+teinte sur un dessin, elle le délavait. Le dessin dit déjà que l'épine n'y est
+plus — c'est suffisant, et plus juste.
