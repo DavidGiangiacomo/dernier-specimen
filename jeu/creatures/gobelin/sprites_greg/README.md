@@ -5,7 +5,7 @@ modifiés, zéro génération.**
 
 Les fiches d'Alessio disent : *« Greg et Lila, 24 × 24, comme le gobelin,
 avec le détail qui les distingue. »* Le détail retenu ici est un **foulard
-rouge noué au cou** (`#c75146`, ombré `#8c2f2f`), repris de l'illustration
+sable noué au cou** (`#ddc89b`, ombré `#99763f`), repris de l'illustration
 d'Alessio où le gobelin épargné en porte un.
 
 **La ligne « à quoi on le reconnaît » de sa fiche n'est pas encore remplie.**
@@ -19,10 +19,20 @@ jeu invite à l'attaquer. » Puis il se retourne. Le signe qui le distingue doit
 donc se lire **de dos avant de se lire de face** — c'est le cas d'un foulard,
 ça ne l'aurait pas été d'une cicatrice ou d'un œil manquant.
 
-Une réserve à trancher : le rouge est la couleur que la palette associe au
-danger, au sang et à Garin Corbe. Sur le premier gobelin ami du jeu, c'est
-discutable. Si ça gêne, `#99763f` ou `#ddc89b` feraient un foulard tout aussi
-lisible sans cette charge.
+## Pourquoi sable, et plus rouge
+
+Le foulard a d'abord été dessiné en rouge, d'après l'illustration. Mais le
+rouge est la couleur que la palette et le GDD attribuent à **Garin Corbe** —
+« Rouges : danger, sang, Garin Corbe ». La porter sur le premier gobelin ami
+du jeu brouillait le signal.
+
+Le sable `#ddc89b` tranche sur la peau verte comme sur la tunique brune, et
+n'entre en concurrence avec rien. `#99763f` seul avait été envisagé, mais
+c'est déjà la couleur claire de la tunique : le foulard s'y serait fondu. Il
+sert donc d'ombre, pas de teinte principale.
+
+Les trois signes du camp sont maintenant distincts : **sable** pour Greg,
+**gris** pour Lila, **rouge** pour Garin.
 
 ## Technique
 
