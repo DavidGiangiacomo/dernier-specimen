@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bd7h8ahc6o4to"
-path="res://.godot/imported/tuiles_provisoires.png-d53b437f27ba5c7fa1e79151066efa3d.ctex"
+uid="uid://7qclyxj4stkh"
+path="res://.godot/imported/tuiles.png-fe5a7cfd369ced3a3392529ec14ba729.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://zone/tuiles/tuiles_provisoires.png"
-dest_files=["res://.godot/imported/tuiles_provisoires.png-d53b437f27ba5c7fa1e79151066efa3d.ctex"]
+source_file="res://zone/tuiles/tuiles.png"
+dest_files=["res://.godot/imported/tuiles.png-fe5a7cfd369ced3a3392529ec14ba729.ctex"]
 
 [params]
 
