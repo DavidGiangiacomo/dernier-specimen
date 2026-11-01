@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://carnet/analysable.gd" id="4_analysable"]
 [ext_resource type="Script" path="res://interaction/interactif.gd" id="5_interactif"]
 [ext_resource type="Resource" path="res://creatures/gobelin/gobelin.tres" id="6_espece"]
+[ext_resource type="Script" path="res://rendu/sprite_directionnel.gd" id="7_dessin"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pieds"]
 size = Vector2(12, 6)
@@ -30,6 +31,16 @@ offset_top = -18.0
 offset_right = 8.0
 mouse_filter = 2
 color = Color(0.43529412, 0.6039216, 0.2901961, 1)
+
+[node name="Dessin" type="Sprite2D" parent="."]
+centered = false
+offset = Vector2(-16, -28)
+script = ExtResource("7_dessin")
+dossier = "res://creatures/gobelin/sprites"
+prefixe = "gobelin"
+couleur_de_reference = Color(0.43529412, 0.6039216, 0.2901961, 1)
+provisoire = NodePath("../Corps")
+etats = Array[String](["malade", "malade_taches", "bebe"])
 
 [node name="Taches" type="Control" parent="Corps"]
 visible = false

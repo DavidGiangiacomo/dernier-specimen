@@ -30,6 +30,11 @@ const DIRECTIONS: Array[String] = [
 ## sans son épine, « a_terre » pour Garin à genoux. Un état dont il manque
 ## une image est ignoré : on garde le jeu normal plutôt que d'afficher un trou.
 @export var etats: Array[String] = []
+## Parmi eux, ceux dont le dessin se suffit : on ne les teinte plus. Une
+## couleur d'état réglée pour remplacer un rectangle délave un dessin qui dit
+## déjà la même chose. Mais une teinte qui ajoute une information — la fièvre
+## du gobelin, qui se cumule avec ses taches — doit continuer de passer.
+@export var etats_sans_teinte: Array[String] = []
 
 ## Au-dessus de ce seuil sur les trois canaux, la couleur demandée est un éclat
 ## blanc, pas une teinte : on blanchit alors franchement tout le dessin.
@@ -102,7 +107,7 @@ func teinter(couleur: Color) -> void:
 	if not visible:
 		return
 	var a := modulate.a
-	if _etat != "" and not _est_un_eclat(couleur):
+	if etats_sans_teinte.has(_etat) and not _est_un_eclat(couleur):
 		# L'état a son propre dessin : il dit déjà ce qu'il a à dire, et le
 		# teinter par-dessus ne ferait que délaver une image déjà juste.
 		# Seul l'éclat d'un coup reçu passe encore.

@@ -9,12 +9,16 @@ const PERSONNAGES := [
 	{"scene": "res://creatures/rase_mousse/rase_mousse.tscn", "nom": "Rase-mousse"},
 	{"scene": "res://creatures/hure/hure.tscn", "nom": "Hure"},
 	{"scene": "res://creatures/garin/garin.tscn", "nom": "Garin"},
+	{"scene": "res://creatures/gobelin/gobelin.tscn", "nom": "Gobelin"},
 ]
 
 ## Les états qui ont leur propre jeu de dessins, et comment les reconnaître.
 const ETATS := [
 	{"scene": "res://creatures/hure/hure.tscn", "nom": "Hure apaisée", "etat": "apaisee"},
 	{"scene": "res://creatures/garin/garin.tscn", "nom": "Garin à terre", "etat": "a_terre"},
+	{"scene": "res://creatures/gobelin/gobelin.tscn", "nom": "Gobelin couché", "etat": "malade"},
+	{"scene": "res://creatures/gobelin/gobelin.tscn", "nom": "Gobelin taché", "etat": "malade_taches"},
+	{"scene": "res://creatures/gobelin/gobelin.tscn", "nom": "Bébé gobelin", "etat": "bebe"},
 ]
 
 
@@ -23,6 +27,7 @@ func lancer() -> void:
 		await un_personnage(p["scene"], p["nom"])
 	for e in ETATS:
 		await un_etat(e["scene"], e["nom"], e["etat"])
+	await teinte_selon_l_etat()
 	await ancrage_de_gojo()
 	await couleurs_d_etat()
 
@@ -172,3 +177,32 @@ func un_etat(chemin: String, nom: String, nom_etat: String) -> void:
 		dessin.texture.resource_path == normal, dessin.texture.resource_path.get_file())
 	scene.queue_free()
 	await attendre(2)
+
+
+## La règle de teinte n'est pas la même pour tous les états, et c'est voulu.
+## La hure apaisée ne se teinte plus : son dessin dit déjà tout, et sa couleur
+## d'état le délavait. Le gobelin malade, lui, doit encore se teinter : la
+## fièvre est un second symptôme, qui se cumule avec les taches.
+func teinte_selon_l_etat() -> void:
+	section("Teinte : seulement là où elle ajoute quelque chose")
+	for cas in [{"scene": "res://creatures/hure/hure.tscn", "nom": "hure apaisée",
+				 "etat": "apaisee", "teinte_attendue": false},
+				{"scene": "res://creatures/gobelin/gobelin.tscn", "nom": "gobelin malade",
+				 "etat": "malade", "teinte_attendue": true}]:
+		var paire := await _poser(cas["scene"])
+		var scene: Node = paire[0]
+		var dessin = paire[1]
+		dessin.etat(cas["etat"])
+		# Une couleur franchement différente de la référence.
+		var autre := Color(dessin.couleur_de_reference.r, dessin.couleur_de_reference.g * 0.5,
+			dessin.couleur_de_reference.b * 0.5)
+		dessin.teinter(autre)
+		var teinte: bool = not dessin.modulate.is_equal_approx(Color(1, 1, 1, dessin.modulate.a))
+		verifier("%s : teintée = %s" % [cas["nom"], cas["teinte_attendue"]],
+			teinte == cas["teinte_attendue"], str(dessin.modulate))
+		# L'éclat d'un coup reçu doit passer dans les deux cas.
+		dessin.teinter(Color.WHITE)
+		verifier("%s : l'éclat d'un coup passe quand même" % cas["nom"],
+			dessin.modulate.r >= 2.0, str(dessin.modulate))
+		scene.queue_free()
+		await attendre(2)
