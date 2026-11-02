@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bd7h8ahc6o4to"
-path="res://.godot/imported/tuiles_provisoires.png-d53b437f27ba5c7fa1e79151066efa3d.ctex"
+uid="uid://oqaqglvp5yws"
+path="res://.godot/imported/gobelin_north-east.png-d15ca664d0f0f46ccec2af0d1515a047.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://zone/tuiles/tuiles_provisoires.png"
-dest_files=["res://.godot/imported/tuiles_provisoires.png-d53b437f27ba5c7fa1e79151066efa3d.ctex"]
+source_file="res://creatures/gobelin/sprites/gobelin_north-east.png"
+dest_files=["res://.godot/imported/gobelin_north-east.png-d15ca664d0f0f46ccec2af0d1515a047.ctex"]
 
 [params]
 

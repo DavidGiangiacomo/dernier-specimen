@@ -282,10 +282,12 @@ Le choix directeur : **le code ne doit jamais attendre l'art**. Tant qu'une méc
 | Résolution de base | 320 × 180, agrandie en entier (×3, ×4, ×6) | Ratio 16:9 exact, pas de pixels déformés |
 | Tuiles | 16 × 16 px | Standard, compatible avec la plupart des packs libres |
 | Personnages | 24 × 24 px | Lisibles à cette résolution, rapides à dessiner |
-| Palette | 24 à 32 couleurs, une seule pour tout le jeu | Rend cohérent même un art débutant, et réduit les décisions |
-| Directions d'animation | 4 (haut, bas, gauche, droite) | Le déplacement reste à 8 directions. Les 4 diagonales doubleraient le travail de dessin pour un gain quasi nul |
+| Palette | 30 couleurs, une seule pour tout le jeu — fixée dans [`jeu/palette/`](../jeu/palette/) | Rend cohérent même un art débutant, et réduit les décisions |
+| Directions d'animation | 8 | Le déplacement est en huit directions depuis le jalon 0. La raison du choix initial — « les diagonales doubleraient le travail de dessin » — est tombée : les directions ne sont plus dessinées une à une, mais pivotées à partir d'une vue de face et d'une vue de dos dessinées à la main. Les huit coûtent alors le même prix que les quatre |
 
 Animations minimales par personnage : repos 2 images, marche 4, attaque 3, analyse 2 + un effet lumineux au gant. Rien d'autre.
+
+Ces comptes sont **par direction**. Le passage à huit directions porte donc un personnage complet de 44 à 88 images : à revérifier au moment d'animer, c'est le poste où le budget peut déraper.
 
 **Règle de lisibilité** : une créature doit être reconnaissable à sa silhouette en noir. Si elle ne l'est pas, c'est la forme qu'il faut corriger, pas les couleurs.
 

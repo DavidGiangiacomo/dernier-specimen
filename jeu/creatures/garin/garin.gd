@@ -108,6 +108,8 @@ var _gojo: Gojo
 var _position_arbalete := Vector2.ZERO
 
 @onready var _corps: ColorRect = $Corps
+## Le dessin, s'il est là. Sinon le rectangle provisoire continue de s'afficher.
+@onready var _dessin: SpriteDirectionnel = get_node_or_null("Dessin")
 @onready var _repere_regard: ColorRect = $RepereRegard
 @onready var _arme: Node2D = $Arme
 @onready var _arbalete: Node2D = $Arme/Arbalete
@@ -432,6 +434,15 @@ func _mettre_a_jour_apparence() -> void:
 		_corps.position.x = -_corps.size.x / 2.0 + (1.0 if posmod(Engine.get_physics_frames(), 4) < 2 else -1.0)
 	else:
 		_corps.position.x = -_corps.size.x / 2.0
+
+	if _dessin:
+		# À terre, il est à genoux : c'est un autre dessin, pas un rectangle
+		# plus court. C'est à ce moment que Gojo lui tend le carnet.
+		_dessin.etat("a_terre" if etat == Etat.A_TERRE else "")
+		_dessin.teinter(couleur)
+		_dessin.regarder(_regard)
+		# Il tremble avant de frapper : l'avertissement doit rester lisible.
+		_dessin.position.x = (1.0 if posmod(Engine.get_physics_frames(), 4) < 2 else -1.0) if etat == Etat.LAME_LEVEE else 0.0
 
 	_arme.rotation = (_direction_visee if etat == Etat.VISEE else _regard).angle()
 	_arbalete.visible = phase == 1 and _arbalete.get_parent() == _arme

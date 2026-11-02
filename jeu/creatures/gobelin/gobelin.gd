@@ -67,6 +67,8 @@ var _degats_des_coups := 0
 var _masque_de_la_hurtbox := 0
 
 @onready var _corps: ColorRect = $Corps
+## Le dessin, s'il est là. Sinon le rectangle provisoire continue de s'afficher.
+@onready var _dessin: SpriteDirectionnel = get_node_or_null("Dessin")
 @onready var _taches: Control = $Corps/Taches
 @onready var _repere_regard: ColorRect = $RepereRegard
 @onready var _hurtbox: Hurtbox = $Hurtbox
@@ -225,5 +227,20 @@ func _mettre_a_jour_apparence() -> void:
 		teinte = teinte.darkened(0.35)
 	_corps.color = Color.WHITE if _temps_eclat > 0.0 else teinte
 	_taches.visible = taches
+	if _dessin:
+		# Trois formes de corps, comme le rectangle : couché s'il est malade,
+		# minuscule si c'est un bébé. Les taches font partie du dessin ; la
+		# fièvre reste une teinte, pour qu'elle se cumule avec elles — ce sont
+		# deux symptômes distincts, et c'est toute l'énigme des malades.
+		var forme := ""
+		if est_malade():
+			forme = "malade_taches" if taches else "malade"
+		elif bebe:
+			forme = "bebe"
+		_dessin.etat(forme)
+		_dessin.teinter(Color.WHITE if _temps_eclat > 0.0 else teinte)
+		_dessin.regarder(regard)
+		# Il tousse : le dessin tremble comme le rectangle.
+		_dessin.position.x = (1.0 if posmod(Engine.get_physics_frames(), 4) < 2 else -1.0) if _temps_toux > 0.0 else 0.0
 	_repere_regard.visible = not est_malade()
 	_repere_regard.position = Vector2(0, -taille.y / 2.0) + regard * (taille.x / 2.0 - 2.0) - _repere_regard.size / 2.0

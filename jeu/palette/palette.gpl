@@ -1,0 +1,34 @@
+GIMP Palette
+Name: Le Dernier Specimen
+Columns: 5
+#
+ 13  15  23	#0d0f17 contour, le noir du jeu
+ 27  31  45	#1b1f2d ombre profonde
+ 51  58  77	#333a4d ombre moyenne
+ 90  99 117	#5a6375 gris froid
+255 248 232	#fff8e8 CODE couleur_roulade
+239 226 196	#efe2c4 creme clair
+232 213 176	#e8d5b0 CODE Corps, le manteau
+168 144 106	#a8906a ombre du manteau
+240 201 164	#f0c9a4 peau claire
+209 157 115	#d19d73 peau moyenne
+150 102  74	#96664a ombre de peau
+ 92  74  61	#5c4a3d cuir clair
+ 58  47  43	#3a2f2b cuir sombre
+ 36  28  26	#241c1a cheveux de Gojo
+216 246 255	#d8f6ff eclat du gant
+143 227 255	#8fe3ff CODE COULEUR_ANALYSE
+ 58 159 201	#3a9fc9 cyan profond
+242 193  78	#f2c14e CODE COULEUR_CLE
+181 129  42	#b5812a ambre sombre
+ 29  51  38	#1d3326 sous-bois
+ 45  84  56	#2d5438 feuillage sombre
+ 69 120  74	#45784a feuillage moyen
+106 156  88	#6a9c58 feuillage clair, peau de gobelin
+157 194 113	#9dc271 herbe eclairee
+ 74  56  40	#4a3828 terre sombre
+110  82  54	#6e5236 bois
+153 118  63	#99763f terre claire
+140  47  47	#8c2f2f rouge sombre
+199  81  70	#c75146 rouge vif
+221 200 155	#ddc89b page du carnet

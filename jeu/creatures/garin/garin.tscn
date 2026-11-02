@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://carnet/analysable.gd" id="4_analysable"]
 [ext_resource type="Script" path="res://interaction/interactif.gd" id="5_interactif"]
 [ext_resource type="Resource" path="res://creatures/garin/garin.tres" id="6_espece"]
+[ext_resource type="Script" path="res://rendu/sprite_directionnel.gd" id="7_dessin"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pieds"]
 size = Vector2(12, 6)
@@ -49,6 +50,16 @@ offset_top = -22.0
 offset_right = 7.0
 mouse_filter = 2
 color = Color(0.41960785, 0.24705882, 0.18431373, 1)
+
+[node name="Dessin" type="Sprite2D" parent="."]
+centered = false
+offset = Vector2(-16, -28)
+script = ExtResource("7_dessin")
+dossier = "res://creatures/garin/sprites"
+prefixe = "garin"
+couleur_de_reference = Color(0.41960785, 0.24705882, 0.18431373, 1)
+provisoire = NodePath("../Corps")
+etats = Array[String](["a_terre"])
 
 [node name="Chapeau" type="ColorRect" parent="Corps"]
 layout_mode = 0

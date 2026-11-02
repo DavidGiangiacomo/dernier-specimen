@@ -105,6 +105,8 @@ var _invite := ""
 var _interagir_tenu := false
 
 @onready var _corps: ColorRect = $Corps
+## Le dessin, s'il est là. Sinon le rectangle provisoire continue de s'afficher.
+@onready var _dessin: SpriteDirectionnel = get_node_or_null("Dessin")
 @onready var _repere_regard: ColorRect = $RepereRegard
 @onready var _baton: Node2D = $Baton
 @onready var _hitbox_baton: Hitbox = $Baton/Hitbox
@@ -336,6 +338,8 @@ func _mettre_a_jour_apparence() -> void:
 	if _temps_eclat > MARGE_ARRONDI:
 		couleur = Color.WHITE
 	_corps.color = couleur
+	if _dessin:
+		_dessin.teinter(couleur)
 
 	var opacite := 1.0
 	if invincible_en_roulade:
@@ -344,6 +348,9 @@ func _mettre_a_jour_apparence() -> void:
 		# Gojo clignote tant qu'il est invincible après un coup.
 		opacite = 0.25 if posmod(Engine.get_physics_frames(), 10) < 5 else 1.0
 	_corps.modulate.a = opacite
+	if _dessin:
+		_dessin.modulate.a = opacite
+		_dessin.regarder(direction_regard)
 
 	# Le bâton et le gant suivent le regard, pour agir du bon côté dès la première image.
 	_baton.rotation = direction_regard.angle()

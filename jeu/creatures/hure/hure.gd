@@ -61,6 +61,8 @@ var _temps_eclat := 0.0
 var _gojo: Node2D
 
 @onready var _corps: ColorRect = $Corps
+## Le dessin, s'il est là. Sinon le rectangle provisoire continue de s'afficher.
+@onready var _dessin: SpriteDirectionnel = get_node_or_null("Dessin")
 @onready var _barre_pv: ColorRect = $BarreFond/BarrePv
 @onready var _hurtbox: Hurtbox = $Hurtbox
 @onready var _hitbox_charge: Hitbox = $HitboxCharge
@@ -170,4 +172,10 @@ func _mettre_a_jour_apparence() -> void:
 	if _temps_eclat > MARGE_ARRONDI:
 		couleur = Color.WHITE
 	_corps.color = couleur
+	if _dessin:
+		# Sans son épine, elle est apaisée : le dessin le montre, là où le
+		# rectangle provisoire ne pouvait que changer de couleur.
+		_dessin.etat("apaisee" if etat == Etat.APAISEE else "")
+		_dessin.teinter(couleur)
+		_dessin.regarder(_direction)
 	_barre_pv.size.x = LARGEUR_BARRE * pv / pv_max

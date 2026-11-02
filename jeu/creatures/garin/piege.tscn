@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://creatures/garin/piege.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://creatures/garin/sprites/piege.png" id="2_dessin"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_piege"]
 size = Vector2(10, 6)
@@ -12,7 +13,14 @@ monitoring = false
 script = ExtResource("1_script")
 force_recul = 60.0
 
+[node name="Dessin" type="Sprite2D" parent="."]
+texture_filter = 1
+centered = false
+offset = Vector2(-8, -8)
+texture = ExtResource("2_dessin")
+
 [node name="Machoires" type="Node2D" parent="."]
+visible = false
 
 [node name="Gauche" type="ColorRect" parent="Machoires"]
 offset_left = -6.0
